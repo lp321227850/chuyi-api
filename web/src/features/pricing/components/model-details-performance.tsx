@@ -169,7 +169,7 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
     staleTime: 60 * 1000,
   })
   const groups = useMemo(
-    () => metricsQuery.data?.data.groups ?? [],
+    () => metricsQuery.data?.data?.groups ?? [],
     [metricsQuery.data]
   )
   const performances = useMemo<PerformanceRow[]>(
