@@ -75,15 +75,12 @@ export function useTopNavLinks(): TopNavLink[] {
   links.push({ title: t('Connect Codex'), href: '/quickstart' })
 
   if (modules?.docs !== false) {
-    if (docsLink) {
-      links.push({
-        title: t('API Docs'),
-        href: docsLink,
-        external: true,
-      })
-    } else {
-      links.push({ title: t('API Docs'), href: '/docs' })
-    }
+    const href = docsLink || 'https://docs.newapi.pro'
+    links.push({
+      title: t('API Docs'),
+      href,
+      external: true,
+    })
   }
 
   const rankings = modules?.rankings
