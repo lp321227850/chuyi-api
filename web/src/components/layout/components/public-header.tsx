@@ -20,7 +20,11 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { AnnouncementBar, BrandMark } from '@/components/chuyi'
+import {
+  AnnouncementBar,
+  BrandMark,
+  resolveMarketingSiteName,
+} from '@/components/chuyi'
 import { Dialog } from '@/components/dialog'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
@@ -125,7 +129,11 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   const user = auth.user
   const isAuthenticated = !!user
-  const displaySiteName = customSiteName || systemName || t('Chuyi API')
+  const displaySiteName = resolveMarketingSiteName({
+    customName: customSiteName,
+    systemName,
+    fallback: t('Chuyi API'),
+  })
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
   const hasCustomLogo =
     Boolean(systemLogo) &&

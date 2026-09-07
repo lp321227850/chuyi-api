@@ -26,7 +26,12 @@ import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { AnnouncementBar, BrandMark, StatsStrip } from '..'
+import {
+  AnnouncementBar,
+  BrandMark,
+  resolveMarketingSiteName,
+  StatsStrip,
+} from '..'
 
 afterEach(() => {
   cleanup()
@@ -37,6 +42,36 @@ describe('BrandMark', () => {
   it('renders the Chuyi character mark', () => {
     render(<BrandMark />)
     expect(screen.getByText('初')).toBeVisible()
+  })
+})
+
+describe('resolveMarketingSiteName', () => {
+  it('falls back to Chuyi API when the backend still uses the default New API name', () => {
+    expect(
+      resolveMarketingSiteName({
+        systemName: 'New API',
+        fallback: 'Chuyi API',
+      })
+    ).toBe('Chuyi API')
+  })
+
+  it('keeps an administrator-configured system name', () => {
+    expect(
+      resolveMarketingSiteName({
+        systemName: 'Acme Gateway',
+        fallback: 'Chuyi API',
+      })
+    ).toBe('Acme Gateway')
+  })
+
+  it('prefers an explicit custom name over the system name', () => {
+    expect(
+      resolveMarketingSiteName({
+        customName: 'Override',
+        systemName: 'Acme Gateway',
+        fallback: 'Chuyi API',
+      })
+    ).toBe('Override')
   })
 })
 

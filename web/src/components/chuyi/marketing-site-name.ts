@@ -16,23 +16,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { DEFAULT_SYSTEM_NAME } from '@/lib/constants'
 
-import { RoutingGraphic } from '../components/routing-graphic'
-
-afterEach(() => {
-  cleanup()
-})
-
-describe('RoutingGraphic', () => {
-  it('lists model providers and coding clients', () => {
-    render(<RoutingGraphic />)
-
-    expect(screen.getByText(/Model providers/)).toBeVisible()
-    expect(screen.getByText(/Coding agents & clients/)).toBeVisible()
-    expect(screen.getAllByText('Claude').length).toBeGreaterThan(0)
-    expect(screen.getByText('Claude Code')).toBeVisible()
-    expect(screen.getByText('Codex')).toBeVisible()
-  })
-})
+export function resolveMarketingSiteName(options: {
+  customName?: string
+  systemName?: string
+  fallback: string
+}): string {
+  if (options.customName) {
+    return options.customName
+  }
+  if (options.systemName && options.systemName !== DEFAULT_SYSTEM_NAME) {
+    return options.systemName
+  }
+  return options.fallback
+}

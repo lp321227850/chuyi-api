@@ -63,7 +63,8 @@ export function RoutingGraphic(props: { className?: string }) {
     >
       <div>
         <p className='text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.16em] uppercase'>
-          ● {t('Model providers')}
+          <span aria-hidden='true'>● </span>
+          {t('Model providers')}
         </p>
         <div className='grid gap-2.5'>
           {PROVIDERS.map((provider) => (
@@ -155,7 +156,8 @@ export function RoutingGraphic(props: { className?: string }) {
 
       <div>
         <p className='text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.16em] uppercase'>
-          ● {t('Coding agents & clients')}
+          <span aria-hidden='true'>● </span>
+          {t('Coding agents & clients')}
         </p>
         <div className='grid gap-2.5'>
           {CLIENTS.map((client) => (

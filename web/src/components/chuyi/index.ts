@@ -19,4 +19,5 @@ For commercial licensing, please contact support@quantumnous.com
 export { AnnouncementBar } from './announcement-bar'
 export { isAnnouncementDismissed } from './announcement-storage'
 export { BrandMark } from './brand-mark'
+export { resolveMarketingSiteName } from './marketing-site-name'
 export { StatsStrip } from './stats-strip'

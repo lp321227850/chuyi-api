@@ -20,6 +20,7 @@ import { Link } from '@tanstack/react-router'
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { resolveMarketingSiteName } from '@/components/chuyi'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
@@ -160,7 +161,11 @@ export function Footer(props: FooterProps) {
   } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
-  const displayName = systemName || props.name || t('Chuyi API')
+  const displayName = resolveMarketingSiteName({
+    customName: props.name,
+    systemName,
+    fallback: t('Chuyi API'),
+  })
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
   const compactLinks: FooterLink[] = [
