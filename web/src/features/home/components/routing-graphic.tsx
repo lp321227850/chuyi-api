@@ -38,7 +38,7 @@ const CLIENTS = [
 
 function NodeCard(props: { name: string; icon: string }) {
   return (
-    <div className='flex items-center gap-2.5 rounded-xl border border-[var(--chuyi-line,#e6e0d6)] bg-white px-3 py-2.5 shadow-[0_1px_2px_rgb(20_20_20/0.04)]'>
+    <div className='chuyi-lift flex items-center gap-2.5 rounded-xl border border-[var(--chuyi-line,#e6e0d6)] bg-white px-3 py-2.5 shadow-[0_1px_2px_rgb(20_20_20/0.04)]'>
       <span className='flex size-7 items-center justify-center'>
         {getLobeIcon(props.icon, 18) ?? (
           <span className='text-muted-foreground text-[10px] font-semibold'>

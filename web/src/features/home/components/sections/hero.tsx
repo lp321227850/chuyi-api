@@ -41,27 +41,27 @@ export function Hero(props: HeroProps) {
       />
 
       <div className='mx-auto flex max-w-4xl flex-col items-center text-center'>
-        <div className='mb-5 inline-flex items-center gap-1.5 rounded-full border border-[var(--chuyi-line,#e6e0d6)] bg-white/80 px-3 py-1.5 text-[11px] font-medium'>
+        <div className='chuyi-enter mb-5 inline-flex items-center gap-1.5 rounded-full border border-[var(--chuyi-line,#e6e0d6)] bg-white/80 px-3 py-1.5 text-[11px] font-medium backdrop-blur-sm'>
           <span className='size-1.5 rounded-full bg-emerald-500' aria-hidden />
           <span>{t('Official models · up to 90% off')}</span>
         </div>
 
-        <h1 className='text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.15] font-bold tracking-tight'>
+        <h1 className='chuyi-enter chuyi-enter-delay-1 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.15] font-bold tracking-tight'>
           {t('LLM routing for production workloads')}
         </h1>
-        <p className='text-muted-foreground mt-5 max-w-2xl text-base leading-relaxed md:text-[17px]'>
+        <p className='text-muted-foreground chuyi-enter chuyi-enter-delay-2 mt-5 max-w-2xl text-base leading-relaxed md:text-[17px]'>
           {t(
             'One Base URL for official models and mainstream agents. Stable, observable, and better priced.'
           )}
         </p>
 
-        <div className='mt-8 flex flex-wrap items-center justify-center gap-3'>
+        <div className='chuyi-enter chuyi-enter-delay-3 mt-8 flex flex-wrap items-center justify-center gap-3'>
           <div className='relative'>
             <span className='absolute -top-7 left-1/2 -translate-x-1/2 rounded bg-[var(--chuyi-ink,#141414)] px-2 py-0.5 text-[10px] font-medium whitespace-nowrap text-white'>
               {t('One-click setup')}
             </span>
             <Button
-              className='h-11 rounded-full bg-[var(--chuyi-ink,#141414)] px-5 text-sm font-medium text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
+              className='chuyi-press h-11 rounded-full bg-[var(--chuyi-ink,#141414)] px-5 text-sm font-medium text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
               render={
                 props.isAuthenticated ? (
                   <Link to='/keys' />
@@ -76,19 +76,19 @@ export function Hero(props: HeroProps) {
           </div>
           <Button
             variant='outline'
-            className='h-11 rounded-full border-[var(--chuyi-ink,#141414)] bg-white px-5 text-sm font-medium'
+            className='chuyi-press h-11 rounded-full border-[var(--chuyi-ink,#141414)] bg-white px-5 text-sm font-medium'
             render={<Link to='/quickstart' />}
           >
-            {t('Download desktop app')}
+            {t('Quick setup')}
           </Button>
         </div>
 
-        <div className='mt-8'>
+        <div className='chuyi-enter chuyi-enter-delay-4 mt-8'>
           <ApiEndpointPill />
         </div>
       </div>
 
-      <div className='mt-16 md:mt-20'>
+      <div className='chuyi-enter chuyi-enter-delay-2 mt-16 md:mt-20'>
         <RoutingGraphic />
       </div>
     </section>

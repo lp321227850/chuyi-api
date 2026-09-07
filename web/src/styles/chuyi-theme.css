@@ -82,6 +82,7 @@ For commercial licensing, please contact support@quantumnous.com
       rgb(255 220 190 / 38%) 0%,
       transparent 72%
     );
+  will-change: transform;
 }
 
 .chuyi-footer-accent {
@@ -121,9 +122,193 @@ For commercial licensing, please contact support@quantumnous.com
   }
 }
 
+@keyframes chuyi-mesh-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.6%, -1.2%, 0) scale(1.035);
+  }
+}
+
+@keyframes chuyi-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chuyi-code-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chuyi-row-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.chuyi-enter {
+  animation: chuyi-enter 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chuyi-enter-delay-1 {
+  animation-delay: 70ms;
+}
+
+.chuyi-enter-delay-2 {
+  animation-delay: 140ms;
+}
+
+.chuyi-enter-delay-3 {
+  animation-delay: 210ms;
+}
+
+.chuyi-enter-delay-4 {
+  animation-delay: 280ms;
+}
+
+.chuyi-nav-link {
+  position: relative;
+}
+
+.chuyi-nav-link::after {
+  content: '';
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.2rem;
+  left: 0.75rem;
+  height: 1.5px;
+  transform: scaleX(0);
+  background: var(--chuyi-orange, #ff6a00);
+  transition: transform 180ms ease;
+}
+
+.chuyi-nav-link:hover::after,
+.chuyi-nav-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+.chuyi-nav-link:hover::after {
+  opacity: 0.4;
+}
+
+.chuyi-nav-link[aria-current='page']::after {
+  opacity: 1;
+}
+
+.chuyi-tab {
+  position: relative;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.chuyi-tab[aria-selected='true'] {
+  border-bottom-color: var(--chuyi-ink, #141414);
+}
+
+.chuyi-pill {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 160ms ease;
+}
+
+.chuyi-lift {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.chuyi-press {
+  transition: transform 140ms ease;
+}
+
+.chuyi-code-fade {
+  animation: chuyi-code-fade 0.22s ease both;
+}
+
+.chuyi-code-swap {
+  overflow: hidden;
+}
+
+.chuyi-table-row {
+  animation: chuyi-row-enter 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: background-color 160ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chuyi-mesh {
+    animation: chuyi-mesh-drift 18s ease-in-out infinite;
+  }
+
+  .chuyi-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgb(20 20 20 / 0.06);
+  }
+
+  .chuyi-press:active {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  .chuyi-pill:active {
+    transform: scale(0.97);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .chuyi-flow-dot {
+  .chuyi-mesh,
+  .chuyi-flow-dot,
+  .chuyi-enter,
+  .chuyi-enter-delay-1,
+  .chuyi-enter-delay-2,
+  .chuyi-enter-delay-3,
+  .chuyi-enter-delay-4,
+  .chuyi-code-fade,
+  .chuyi-table-row {
     animation: none !important;
+  }
+
+  .chuyi-enter,
+  .chuyi-code-fade,
+  .chuyi-table-row {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .chuyi-code-swap {
+    overflow: visible;
+  }
+
+  .chuyi-flow-dot {
     opacity: 0.7;
+  }
+
+  .chuyi-lift,
+  .chuyi-press,
+  .chuyi-pill,
+  .chuyi-nav-link::after,
+  .chuyi-tab {
+    transition: none !important;
   }
 }

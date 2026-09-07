@@ -207,7 +207,7 @@ export function PublicHeader(props: PublicHeaderProps) {
       className={cn(
         'h-8 px-3.5 text-xs font-medium',
         isMarketing &&
-          'rounded-full bg-[var(--chuyi-ink,#141414)] text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
+          'chuyi-press rounded-full bg-[var(--chuyi-ink,#141414)] text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
       )}
       render={<Link to='/sign-in' />}
     >
@@ -321,6 +321,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
                       'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                      isMarketing && 'chuyi-nav-link',
                       navLinkTone(isActive, isMarketing, true),
                       link.disabled && 'pointer-events-none opacity-50'
                     )}

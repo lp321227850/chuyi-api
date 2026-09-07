@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AnimateInView } from '@/components/animate-in-view'
 import { StatsStrip } from '@/components/chuyi'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
@@ -139,6 +140,7 @@ export function Pricing() {
 
     return (
       <TeamoPricingTable
+        key={vendorFilter}
         models={filteredModels}
         priceRate={priceRate}
         usdExchangeRate={usdExchangeRate}
@@ -168,7 +170,7 @@ export function Pricing() {
           className='chuyi-mesh pointer-events-none absolute inset-x-0 top-0 h-[28rem] opacity-70'
         />
         <PageTransition className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
-          <header className='mb-8 pt-4 sm:mb-10'>
+          <header className='chuyi-enter mb-8 pt-4 sm:mb-10'>
             <h1 className='text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'>
               {t('Model Pricing')}
             </h1>
@@ -252,7 +254,9 @@ export function Pricing() {
             />
           )}
         </PageTransition>
-        <StatsStrip />
+        <AnimateInView>
+          <StatsStrip />
+        </AnimateInView>
         <Footer variant='compact' />
       </div>
     </PublicLayout>

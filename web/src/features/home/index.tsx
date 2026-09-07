@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AnimateInView } from '@/components/animate-in-view'
 import { StatsStrip } from '@/components/chuyi'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
@@ -124,7 +125,9 @@ export function Home() {
   return (
     <PublicLayout showMainContainer={false}>
       <Hero isAuthenticated={isAuthenticated} />
-      <StatsStrip />
+      <AnimateInView>
+        <StatsStrip />
+      </AnimateInView>
       <Footer variant='compact' />
     </PublicLayout>
   )

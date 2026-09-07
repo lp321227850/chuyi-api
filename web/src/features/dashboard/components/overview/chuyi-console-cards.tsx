@@ -89,7 +89,7 @@ export function ChuyiConsoleCards() {
   return (
     <div data-chuyi-theme='' className='flex flex-col gap-4'>
       <div className='grid gap-4 lg:grid-cols-3'>
-        <article className='rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
+        <article className='chuyi-lift rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
           <div className='flex items-center justify-between gap-2'>
             <h3 className='text-sm font-semibold'>{t('Account balance')}</h3>
             <span className='rounded-full bg-[var(--chuyi-peach,#fff1e4)] px-2 py-0.5 text-[10px] font-semibold text-[var(--chuyi-orange,#ff6a00)]'>
@@ -110,14 +110,14 @@ export function ChuyiConsoleCards() {
           </p>
           <div className='mt-4 flex flex-wrap gap-2'>
             <Button
-              className='rounded-full bg-[var(--chuyi-ink,#141414)] text-white'
+              className='chuyi-press rounded-full bg-[var(--chuyi-ink,#141414)] text-white'
               render={<Link to='/wallet' />}
             >
               {t('Top up now')}
             </Button>
             <Button
               variant='outline'
-              className='rounded-full bg-white'
+              className='chuyi-press rounded-full bg-white'
               render={<Link to='/usage-logs' />}
             >
               {t('Billing details')}
@@ -125,7 +125,7 @@ export function ChuyiConsoleCards() {
           </div>
         </article>
 
-        <article className='rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
+        <article className='chuyi-lift rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
           <h3 className='text-sm font-semibold'>{t("Today's usage")}</h3>
           <p className='mt-3 text-2xl font-bold tracking-tight'>
             {formatQuota(recentUsage)}
@@ -146,7 +146,7 @@ export function ChuyiConsoleCards() {
           </div>
         </article>
 
-        <article className='rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
+        <article className='chuyi-lift rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
           <h3 className='text-sm font-semibold'>{t('API keys shortcut')}</h3>
           <p className='text-muted-foreground mt-1 text-xs'>
             {t('{{total}} keys · {{active}} active', {
@@ -167,14 +167,14 @@ export function ChuyiConsoleCards() {
           </div>
           <div className='mt-4 flex flex-wrap gap-2'>
             <Button
-              className='rounded-full bg-[var(--chuyi-ink,#141414)] text-white'
+              className='chuyi-press rounded-full bg-[var(--chuyi-ink,#141414)] text-white'
               render={<Link to='/keys' />}
             >
               {t('New Key')}
             </Button>
             <Button
               variant='outline'
-              className='rounded-full bg-white'
+              className='chuyi-press rounded-full bg-white'
               render={<Link to='/keys' />}
             >
               {t('Manage')}
@@ -258,7 +258,7 @@ function AgentCard(props: {
 }) {
   const { t } = useTranslation()
   return (
-    <article className='rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
+    <article className='chuyi-lift rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
       <div className='flex size-9 items-center justify-center rounded-lg bg-[var(--chuyi-peach,#fff1e4)] text-[var(--chuyi-orange,#ff6a00)]'>
         {props.icon}
       </div>

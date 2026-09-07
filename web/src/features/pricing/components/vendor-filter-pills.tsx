@@ -60,7 +60,7 @@ export function VendorFilterPills(props: VendorFilterPillsProps) {
             variant={selected ? 'default' : 'outline'}
             size='sm'
             className={cn(
-              'h-8 rounded-full px-3 text-xs',
+              'chuyi-pill h-8 rounded-full px-3 text-xs',
               selected ? 'bg-[var(--chuyi-ink,#141414)] text-white' : 'bg-white'
             )}
             onClick={() => props.onChange(pill.value)}

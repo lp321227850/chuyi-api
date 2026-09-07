@@ -75,7 +75,7 @@ export function Quickstart(props: QuickstartProps) {
   return (
     <PublicLayout showMainContainer={false}>
       <main className='mx-auto w-full max-w-6xl px-4 pt-28 pb-16 sm:px-6'>
-        <header className='mx-auto mb-10 max-w-3xl text-center'>
+        <header className='chuyi-enter mx-auto mb-10 max-w-3xl text-center'>
           <h1 className='text-[clamp(2rem,5vw,3.25rem)] font-bold tracking-tight'>
             {t('Quick Start')}
           </h1>
@@ -95,7 +95,7 @@ export function Quickstart(props: QuickstartProps) {
             </p>
             <Link
               to='/about'
-              className='block rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'
+              className='chuyi-lift block rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'
             >
               <div className='text-sm font-semibold'>
                 {t('Full integration guide')}
@@ -106,13 +106,13 @@ export function Quickstart(props: QuickstartProps) {
             </Link>
             <Link
               to='/keys'
-              className='block rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'
+              className='chuyi-lift block rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'
             >
-              <div className='text-sm font-semibold'>
-                {t('Download desktop config tool')}
-              </div>
+              <div className='text-sm font-semibold'>{t('Get an API key')}</div>
               <p className='text-muted-foreground mt-1 text-xs'>
-                {t('One-click Codex / Claude Code setup for new users')}
+                {t(
+                  'Create one, then paste it into the snippets on this page.'
+                )}
               </p>
             </Link>
           </aside>
@@ -132,9 +132,9 @@ export function Quickstart(props: QuickstartProps) {
                     role='tab'
                     aria-selected={selected}
                     className={cn(
-                      'pb-2 text-sm font-medium',
+                      'chuyi-tab pb-2 text-sm font-medium',
                       selected
-                        ? 'border-b-2 border-[var(--chuyi-ink,#141414)] text-[var(--chuyi-ink,#141414)]'
+                        ? 'text-[var(--chuyi-ink,#141414)]'
                         : 'text-muted-foreground'
                     )}
                     onClick={() => setClient(item)}
@@ -157,7 +157,7 @@ export function Quickstart(props: QuickstartProps) {
                         size='sm'
                         variant={selected ? 'default' : 'outline'}
                         className={cn(
-                          'h-8 rounded-full px-3 text-xs',
+                          'chuyi-pill h-8 rounded-full px-3 text-xs',
                           selected && 'bg-[var(--chuyi-ink,#141414)] text-white'
                         )}
                         aria-pressed={selected}
@@ -213,9 +213,14 @@ export function Quickstart(props: QuickstartProps) {
                   </CopyButton>
                 </div>
               </div>
-              <pre className='overflow-x-auto p-4 font-mono text-[13px] leading-6'>
-                <code>{snippet}</code>
-              </pre>
+              <div
+                key={`${client}-${language}`}
+                className='chuyi-code-swap chuyi-code-fade'
+              >
+                <pre className='overflow-x-auto p-4 font-mono text-[13px] leading-6'>
+                  <code>{snippet}</code>
+                </pre>
+              </div>
             </div>
           </section>
         </div>

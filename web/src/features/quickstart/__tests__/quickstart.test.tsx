@@ -69,6 +69,10 @@ describe('Quickstart page', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'Quick Start' })).toBeVisible()
+    expect(screen.getByText('Get an API key')).toBeVisible()
+    expect(
+      screen.queryByText('Download desktop config tool')
+    ).not.toBeInTheDocument()
     expect(screen.getByText(/ANTHROPIC_BASE_URL/)).toBeVisible()
 
     await user.click(screen.getByRole('tab', { name: 'API' }))

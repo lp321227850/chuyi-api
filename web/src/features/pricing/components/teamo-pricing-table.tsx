@@ -111,7 +111,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
             </tr>
           </thead>
           <tbody>
-            {visibleModels.map((model) => {
+            {visibleModels.map((model, index) => {
               const discount = getSiteDiscountPercent(
                 model,
                 props.selectedGroup
@@ -179,7 +179,8 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
               return (
                 <tr
                   key={model.model_name}
-                  className='cursor-pointer border-b border-dashed border-[var(--chuyi-line,#e6e0d6)] last:border-b-0 hover:bg-[var(--chuyi-cream,#fffefb)]'
+                  className='chuyi-table-row cursor-pointer border-b border-dashed border-[var(--chuyi-line,#e6e0d6)] last:border-b-0 hover:bg-[var(--chuyi-cream,#fffefb)]'
+                  style={{ animationDelay: `${index * 30}ms` }}
                   onClick={() => props.onModelClick?.(model.model_name)}
                 >
                   <td className='px-4 py-3'>
@@ -260,7 +261,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
           <Button
             type='button'
             variant='outline'
-            className='rounded-full bg-white'
+            className='chuyi-press rounded-full bg-white'
             onClick={() => setExpanded((value) => !value)}
           >
             {expanded ? t('Show less') : t('Show more')}
