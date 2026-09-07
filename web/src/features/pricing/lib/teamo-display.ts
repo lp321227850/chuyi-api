@@ -16,10 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { ApiEndpointPill } from './api-endpoint-pill'
-export { RoutingGraphic } from './routing-graphic'
-export { CTA } from './sections/cta'
-export { Features } from './sections/features'
-export { Hero } from './sections/hero'
-export { HowItWorks } from './sections/how-it-works'
-export { Stats } from './sections/stats'
+export function formatContextWindow(length?: number): string {
+  if (!length || !Number.isFinite(length) || length <= 0) return '—'
+  if (length >= 1_000_000) {
+    const millions = length / 1_000_000
+    return `${Number.isInteger(millions) ? millions.toFixed(0) : stripPointZero(millions)}M`
+  }
+  if (length >= 1000) {
+    const thousands = length / 1000
+    return `${Number.isInteger(thousands) ? thousands.toFixed(0) : stripPointZero(thousands)}K`
+  }
+  return String(length)
+}
+
+function stripPointZero(value: number): string {
+  return value.toFixed(1).replace(/\.0$/, '')
+}
+
+export const TEAMO_TABLE_PREVIEW_COUNT = 12

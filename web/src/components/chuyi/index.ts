@@ -16,10 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { ApiEndpointPill } from './api-endpoint-pill'
-export { RoutingGraphic } from './routing-graphic'
-export { CTA } from './sections/cta'
-export { Features } from './sections/features'
-export { Hero } from './sections/hero'
-export { HowItWorks } from './sections/how-it-works'
-export { Stats } from './sections/stats'
+export { AnnouncementBar } from './announcement-bar'
+export { isAnnouncementDismissed } from './announcement-storage'
+export { BrandMark } from './brand-mark'
+export { StatsStrip } from './stats-strip'

@@ -270,3 +270,52 @@ export function formatRequestPrice(
     abbreviate: false,
   })
 }
+
+export function getSiteDiscountPercent(
+  model: PricingModel,
+  selectedGroup?: string
+): number | null {
+  const ratio = getDisplayGroupRatio(model, selectedGroup)
+  if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
+    return null
+  }
+  return Math.max(1, Math.round((1 - ratio) * 100))
+}
+
+export function formatListPrice(
+  model: PricingModel,
+  type: PriceType,
+  tokenUnit: TokenUnit,
+  showWithRecharge = false,
+  priceRate = 1,
+  usdExchangeRate = 1
+): string {
+  if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
+    let priceInUSD = model.model_price || 0
+    priceInUSD = applyRechargeRate(
+      priceInUSD,
+      showWithRecharge,
+      priceRate,
+      usdExchangeRate
+    )
+    return formatCurrencyFromUSD(priceInUSD, {
+      digitsLarge: 4,
+      digitsSmall: 4,
+      abbreviate: false,
+    })
+  }
+
+  let priceInUSD = calculateTokenPrice(model, type, 1)
+  priceInUSD = applyRechargeRate(
+    priceInUSD,
+    showWithRecharge,
+    priceRate,
+    usdExchangeRate
+  )
+  const price = priceInUSD / TOKEN_UNIT_DIVISORS[tokenUnit]
+  return formatCurrencyFromUSD(price, {
+    digitsLarge: 4,
+    digitsSmall: 6,
+    abbreviate: false,
+  })
+}

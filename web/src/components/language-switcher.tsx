@@ -35,10 +35,25 @@ import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 
-export function LanguageSwitcher() {
+function languageCompactLabel(code: string): string {
+  if (code === 'zhCN') return '中'
+  if (code === 'zhTW') return '繁'
+  if (code === 'ja') return 'あ'
+  if (code === 'ru') return 'РУ'
+  if (code === 'vi') return 'VI'
+  if (code === 'fr') return 'FR'
+  return 'EN'
+}
+
+interface LanguageSwitcherProps {
+  appearance?: 'icon' | 'compact'
+}
+
+export function LanguageSwitcher(props: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation()
   const user = useAuthStore((s) => s.auth.user)
   const currentLanguage = normalizeInterfaceLanguage(i18n.language)
+  const appearance = props.appearance ?? 'icon'
   const handleChangeLanguage = useCallback(
     async (code: string) => {
       await i18n.changeLanguage(code)
@@ -56,9 +71,25 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
-        render={<Button variant='ghost' size='icon' className='h-9 w-9' />}
+        render={
+          appearance === 'compact' ? (
+            <Button
+              variant='ghost'
+              size='sm'
+              className='h-8 min-w-8 px-2 text-xs font-semibold'
+            />
+          ) : (
+            <Button variant='ghost' size='icon' className='h-9 w-9' />
+          )
+        }
       >
-        <Languages className='size-[1.2rem]' />
+        {appearance === 'compact' ? (
+          <span aria-hidden='true'>
+            {languageCompactLabel(currentLanguage)}
+          </span>
+        ) : (
+          <Languages className='size-[1.2rem]' />
+        )}
         <span className='sr-only'>{t('Change language')}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>

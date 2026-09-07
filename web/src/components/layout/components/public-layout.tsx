@@ -16,6 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useCallback, useState } from 'react'
+
+import { isAnnouncementDismissed } from '@/components/chuyi'
+import { cn } from '@/lib/utils'
+
 import type { TopNavLink } from '../types'
 import { PublicHeader, type PublicHeaderProps } from './public-header'
 
@@ -33,21 +38,37 @@ type PublicLayoutProps = {
 }
 
 export function PublicLayout(props: PublicLayoutProps) {
+  const [announceOn, setAnnounceOn] = useState(() => !isAnnouncementDismissed())
+  const handleAnnounceDismiss = useCallback(() => {
+    setAnnounceOn(false)
+  }, [])
+
   return (
-    <div className='bg-background text-foreground relative min-h-svh overflow-x-clip'>
+    <div
+      data-chuyi-theme=''
+      data-chuyi-announce={announceOn ? 'on' : 'off'}
+      className='bg-background text-foreground relative min-h-svh overflow-x-clip'
+    >
       <PublicHeader
+        appearance='marketing'
         navContent={props.navContent}
         navLinks={props.navLinks}
-        showThemeSwitch={props.showThemeSwitch}
+        showThemeSwitch={props.showThemeSwitch ?? false}
         showAuthButtons={props.showAuthButtons}
         showNotifications={props.showNotifications}
         logo={props.logo}
         siteName={props.siteName}
+        onAnnouncementDismiss={handleAnnounceDismiss}
         {...props.headerProps}
       />
 
       {props.showMainContainer !== false ? (
-        <main className='container px-4 py-6 pt-20 md:px-4'>
+        <main
+          className={cn(
+            'container px-4 py-6 md:px-4',
+            announceOn ? 'pt-28' : 'pt-20'
+          )}
+        >
           {props.children}
         </main>
       ) : (

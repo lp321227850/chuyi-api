@@ -16,10 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { ApiEndpointPill } from './api-endpoint-pill'
-export { RoutingGraphic } from './routing-graphic'
-export { CTA } from './sections/cta'
-export { Features } from './sections/features'
-export { Hero } from './sections/hero'
-export { HowItWorks } from './sections/how-it-works'
-export { Stats } from './sections/stats'
+export const ANNOUNCEMENT_STORAGE_KEY = 'chuyi_announcement_dismissed'
+
+export function isAnnouncementDismissed(): boolean {
+  if (typeof window === 'undefined') return true
+  return window.sessionStorage.getItem(ANNOUNCEMENT_STORAGE_KEY) === '1'
+}

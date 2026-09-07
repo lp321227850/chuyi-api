@@ -40,6 +40,7 @@ interface FooterProps {
   columns?: FooterColumnProps[]
   copyright?: string
   className?: string
+  variant?: 'default' | 'compact'
 }
 
 const NEW_API_FOOTER_ATTRIBUTION_KEY = [
@@ -159,9 +160,15 @@ export function Footer(props: FooterProps) {
   } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
-  const displayName = systemName || props.name || 'New API'
+  const displayName = systemName || props.name || t('Chuyi API')
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
+  const compactLinks: FooterLink[] = [
+    { text: 'Home', href: '/' },
+    { text: 'Model Pricing', href: '/pricing' },
+    { text: 'Quick Start', href: '/quickstart' },
+    { text: 'Console', href: '/dashboard' },
+  ]
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
@@ -222,6 +229,30 @@ export function Footer(props: FooterProps) {
 
   const displayColumns = props.columns ?? fallbackColumns
 
+  if (props.variant === 'compact') {
+    return (
+      <footer className={cn('relative z-10', props.className)}>
+        <div className='border-t border-dashed border-[var(--chuyi-line,#e6e0d6)]'>
+          <div className='mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 py-8'>
+            <nav className='flex flex-wrap items-center justify-center gap-x-5 gap-y-2'>
+              {compactLinks.map((link) => (
+                <FooterLinkItem key={link.href} link={link} />
+              ))}
+            </nav>
+            <div className='text-muted-foreground/45 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs'>
+              <span>
+                &copy; {currentYear} {displayName}
+              </span>
+              <LegalLinks leadingSeparator />
+            </div>
+            <ProjectAttribution currentYear={currentYear} />
+          </div>
+        </div>
+        <div className='chuyi-footer-accent' aria-hidden='true' />
+      </footer>
+    )
+  }
+
   if (footerHtml) {
     return (
       <footer
@@ -272,14 +303,14 @@ export function Footer(props: FooterProps) {
           {/* Links columns */}
           {isDemoSiteMode && (
             <div className='grid grid-cols-3 gap-8 md:gap-16'>
-              {displayColumns.map((column, index) => (
-                <div key={index}>
+              {displayColumns.map((column) => (
+                <div key={column.title}>
                   <p className='text-muted-foreground/50 mb-3 text-xs font-medium tracking-wider uppercase'>
                     {t(column.title)}
                   </p>
                   <ul className='space-y-2.5'>
-                    {column.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
+                    {column.links.map((link) => (
+                      <li key={`${column.title}-${link.href}`}>
                         <FooterLinkItem link={link} />
                       </li>
                     ))}

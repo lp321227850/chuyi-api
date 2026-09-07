@@ -1,0 +1,129 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/* TeamoRouter-inspired cream surface for user-facing Chuyi pages.
+ * Scoped so admin chrome and user-selected dark mode stay intact outside
+ * `[data-chuyi-theme]`. Variables are repeated under `.dark` so nested
+ * marketing/console surfaces stay light even when the document is dark. */
+[data-chuyi-theme],
+.dark [data-chuyi-theme] {
+  color-scheme: light;
+  --chuyi-cream: #fffefb;
+  --chuyi-ink: #141414;
+  --chuyi-orange: #ff6a00;
+  --chuyi-peach: #fff1e4;
+  --chuyi-peach-strong: #ffe4cc;
+  --chuyi-cyan: #c8e8ee;
+  --chuyi-muted: #6d675f;
+  --chuyi-line: #e6e0d6;
+  --chuyi-card: #ffffff;
+  --background: #fffefb;
+  --foreground: #141414;
+  --card: #ffffff;
+  --card-foreground: #141414;
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+  --primary: #141414;
+  --primary-foreground: #fffefb;
+  --secondary: #f6f1ea;
+  --secondary-foreground: #141414;
+  --muted: #f6f1ea;
+  --muted-foreground: #6d675f;
+  --accent: #fff1e4;
+  --accent-foreground: #141414;
+  --border: #e6e0d6;
+  --input: #e6e0d6;
+  --ring: #ff6a00;
+  --sidebar: #fffefb;
+  --sidebar-foreground: #141414;
+  --sidebar-primary: #141414;
+  --sidebar-primary-foreground: #fffefb;
+  --sidebar-accent: #fff1e4;
+  --sidebar-accent-foreground: #141414;
+  --sidebar-border: #e6e0d6;
+  --chuyi-header-offset: 4.25rem;
+  background-color: var(--chuyi-cream);
+  color: var(--chuyi-ink);
+}
+
+[data-chuyi-theme][data-chuyi-announce='on'] {
+  --chuyi-header-offset: 6.5rem;
+}
+
+.chuyi-mesh {
+  background:
+    radial-gradient(
+      ellipse 55% 50% at 32% 38%,
+      rgb(255 176 140 / 48%) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 48% 42% at 70% 32%,
+      rgb(170 220 230 / 42%) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 42% 38% at 52% 72%,
+      rgb(255 220 190 / 38%) 0%,
+      transparent 72%
+    );
+}
+
+.chuyi-footer-accent {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #b9a4e8 0%,
+    #f3c4a8 42%,
+    #ff8a4c 72%,
+    #ff6a00 100%
+  );
+}
+
+.chuyi-hairline {
+  border-color: var(--chuyi-line);
+}
+
+.chuyi-dashed {
+  border-style: dashed;
+}
+
+@keyframes chuyi-dot-flow {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chuyi-flow-dot {
+    animation: none !important;
+    opacity: 0.7;
+  }
+}

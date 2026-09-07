@@ -29,3 +29,5 @@ export {
   ModelDetailsDrawer,
 } from './model-details'
 export { PricingTable } from './pricing-table'
+export { TeamoPricingTable } from './teamo-pricing-table'
+export { VendorFilterPills } from './vendor-filter-pills'

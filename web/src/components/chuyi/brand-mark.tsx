@@ -16,10 +16,36 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { ApiEndpointPill } from './api-endpoint-pill'
-export { RoutingGraphic } from './routing-graphic'
-export { CTA } from './sections/cta'
-export { Features } from './sections/features'
-export { Hero } from './sections/hero'
-export { HowItWorks } from './sections/how-it-works'
-export { Stats } from './sections/stats'
+import { useTranslation } from 'react-i18next'
+
+import { cn } from '@/lib/utils'
+
+interface BrandMarkProps {
+  className?: string
+  size?: 'sm' | 'md' | 'lg'
+}
+
+const SIZE_CLASS = {
+  sm: 'size-7 text-[13px]',
+  md: 'size-8 text-sm',
+  lg: 'size-12 text-lg',
+} as const
+
+export function BrandMark(props: BrandMarkProps) {
+  const { t } = useTranslation()
+  const size = props.size ?? 'sm'
+
+  return (
+    <span
+      aria-hidden='true'
+      className={cn(
+        'inline-flex shrink-0 items-center justify-center rounded-[5px] bg-[var(--chuyi-ink,#141414)] font-semibold text-[var(--chuyi-cream,#fffefb)]',
+        SIZE_CLASS[size],
+        props.className
+      )}
+      title={t('Chuyi API')}
+    >
+      初
+    </span>
+  )
+}

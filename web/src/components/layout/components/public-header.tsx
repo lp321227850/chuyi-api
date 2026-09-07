@@ -20,6 +20,7 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AnnouncementBar, BrandMark } from '@/components/chuyi'
 import { Dialog } from '@/components/dialog'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
@@ -38,6 +39,31 @@ import type { TopNavLink } from '../types'
 import { HeaderLogo } from './header-logo'
 
 const AUTH_PROMPT_SECONDS = 5
+
+function defaultShellClass(scrolled: boolean) {
+  if (scrolled) return 'max-w-[52rem] px-3 pt-3'
+  return 'max-w-7xl px-4 pt-0 md:px-6'
+}
+
+function defaultNavClass(scrolled: boolean) {
+  if (scrolled) {
+    return 'bg-background/60 ring-border/50 h-12 rounded-2xl pr-1.5 pl-4 shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] ring-[0.5px] backdrop-blur-2xl dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]'
+  }
+  return 'h-16 px-2'
+}
+
+function navLinkTone(
+  isActive: boolean,
+  isMarketing: boolean,
+  withHover: boolean
+) {
+  if (isActive) {
+    if (isMarketing) return 'text-[var(--chuyi-orange,#ff6a00)]'
+    return 'text-foreground'
+  }
+  if (withHover) return 'text-muted-foreground hover:text-foreground'
+  return 'text-muted-foreground'
+}
 
 type AuthPromptTarget = {
   title: string
@@ -59,6 +85,8 @@ export interface PublicHeaderProps {
   showAuthButtons?: boolean
   showNotifications?: boolean
   className?: string
+  appearance?: 'default' | 'marketing'
+  onAnnouncementDismiss?: () => void
 }
 
 export function PublicHeader(props: PublicHeaderProps) {
@@ -71,7 +99,9 @@ export function PublicHeader(props: PublicHeaderProps) {
     homeUrl = '/',
     showAuthButtons = true,
     showNotifications = true,
+    appearance = 'default',
   } = props
+  const isMarketing = appearance === 'marketing'
 
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -95,8 +125,13 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   const user = auth.user
   const isAuthenticated = !!user
-  const displaySiteName = customSiteName || systemName
+  const displaySiteName = customSiteName || systemName || t('Chuyi API')
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
+  const hasCustomLogo =
+    Boolean(systemLogo) &&
+    systemLogo !== '/logo.png' &&
+    systemLogo !== 'logo.png'
+  const showNotificationsForUser = showNotifications && isAuthenticated
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -142,6 +177,41 @@ export function PublicHeader(props: PublicHeaderProps) {
     navigate({ to: '/sign-in', search: { redirect } })
   }, [authPromptTarget?.href, navigate])
 
+  let logoNode: React.ReactNode = (
+    <HeaderLogo
+      src={systemLogo}
+      loading={loading}
+      logoLoaded={logoLoaded}
+      className='size-full rounded-lg object-contain'
+    />
+  )
+  if (loading) {
+    logoNode = <Skeleton className='size-full rounded-lg' />
+  } else if (customLogo) {
+    logoNode = customLogo
+  } else if (isMarketing && !hasCustomLogo) {
+    logoNode = <BrandMark />
+  }
+
+  let authControl: React.ReactNode = (
+    <Button
+      size='sm'
+      className={cn(
+        'h-8 px-3.5 text-xs font-medium',
+        isMarketing &&
+          'rounded-full bg-[var(--chuyi-ink,#141414)] text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
+      )}
+      render={<Link to='/sign-in' />}
+    >
+      {t('Sign in')}
+    </Button>
+  )
+  if (loading) {
+    authControl = <Skeleton className='h-8 w-20 rounded-lg' />
+  } else if (isAuthenticated) {
+    authControl = <ProfileDropdown />
+  }
+
   const handleNavLinkClick = useCallback(
     (
       event: React.MouseEvent<HTMLAnchorElement>,
@@ -176,18 +246,23 @@ export function PublicHeader(props: PublicHeaderProps) {
   return (
     <>
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
+        {isMarketing && (
+          <div className='pointer-events-auto'>
+            <AnnouncementBar onDismiss={props.onAnnouncementDismiss} />
+          </div>
+        )}
         <div
           className={cn(
             'pointer-events-auto mx-auto transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-            scrolled ? 'max-w-[52rem] px-3 pt-3' : 'max-w-7xl px-4 pt-0 md:px-6'
+            isMarketing
+              ? 'max-w-none border-b border-[var(--chuyi-line,#e6e0d6)] bg-[var(--chuyi-cream,#fffefb)]/95 px-4 backdrop-blur-md md:px-6'
+              : defaultShellClass(scrolled)
           )}
         >
           <nav
             className={cn(
               'flex items-center justify-between transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-              scrolled
-                ? 'bg-background/60 ring-border/50 h-12 rounded-2xl pr-1.5 pl-4 shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] ring-[0.5px] backdrop-blur-2xl dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]'
-                : 'h-16 px-2'
+              isMarketing ? 'mx-auto h-16 max-w-7xl' : defaultNavClass(scrolled)
             )}
           >
             {/* Logo */}
@@ -196,18 +271,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               className='group flex shrink-0 items-center gap-2.5'
             >
               <div className='flex size-7 shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105'>
-                {loading ? (
-                  <Skeleton className='size-full rounded-lg' />
-                ) : customLogo ? (
-                  customLogo
-                ) : (
-                  <HeaderLogo
-                    src={systemLogo}
-                    loading={loading}
-                    logoLoaded={logoLoaded}
-                    className='size-full rounded-lg object-contain'
-                  />
-                )}
+                {logoNode}
               </div>
               <span className='text-sm font-semibold tracking-tight'>
                 {loading ? <Skeleton className='h-4 w-16' /> : displaySiteName}
@@ -216,12 +280,14 @@ export function PublicHeader(props: PublicHeaderProps) {
 
             {/* Desktop nav */}
             <div className='hidden items-center gap-0.5 sm:flex'>
-              {links.map((link, i) => {
-                const isActive = pathname === link.href
+              {links.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== '/' && pathname.startsWith(`${link.href}/`))
                 if (link.external) {
                   return (
                     <a
-                      key={i}
+                      key={`ext-${link.href}`}
                       href={link.href}
                       target='_blank'
                       rel='noopener noreferrer'
@@ -229,7 +295,8 @@ export function PublicHeader(props: PublicHeaderProps) {
                       tabIndex={link.disabled ? -1 : undefined}
                       onClick={(event) => handleNavLinkClick(event, link)}
                       className={cn(
-                        'text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                        'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                        'text-muted-foreground hover:text-foreground',
                         link.disabled && 'pointer-events-none opacity-50'
                       )}
                     >
@@ -239,15 +306,14 @@ export function PublicHeader(props: PublicHeaderProps) {
                 }
                 return (
                   <Link
-                    key={i}
+                    key={link.href}
                     to={link.href}
                     disabled={link.disabled}
                     onClick={(event) => handleNavLinkClick(event, link)}
+                    aria-current={isActive ? 'page' : undefined}
                     className={cn(
                       'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200',
-                      isActive
-                        ? 'text-foreground'
-                        : 'text-muted-foreground hover:text-foreground',
+                      navLinkTone(isActive, isMarketing, true),
                       link.disabled && 'pointer-events-none opacity-50'
                     )}
                   >
@@ -262,9 +328,13 @@ export function PublicHeader(props: PublicHeaderProps) {
                 <div className='bg-border/40 mx-2 h-4 w-px' />
               )}
 
-              {showLanguageSwitcher && <LanguageSwitcher />}
+              {showLanguageSwitcher && (
+                <LanguageSwitcher
+                  appearance={isMarketing ? 'compact' : 'icon'}
+                />
+              )}
               {showThemeSwitch && <ThemeSwitch />}
-              {showNotifications && (
+              {showNotificationsForUser && (
                 <NotificationPopover
                   open={notifications.popoverOpen}
                   onOpenChange={notifications.setPopoverOpen}
@@ -280,19 +350,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               {showAuthButtons && (
                 <>
                   <div className='bg-border/40 mx-1 h-4 w-px' />
-                  {loading ? (
-                    <Skeleton className='h-8 w-20 rounded-lg' />
-                  ) : isAuthenticated ? (
-                    <ProfileDropdown />
-                  ) : (
-                    <Button
-                      size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
-                      render={<Link to='/sign-in' />}
-                    >
-                      {t('Sign in')}
-                    </Button>
-                  )}
+                  {authControl}
                 </>
               )}
             </div>
@@ -349,13 +407,15 @@ export function PublicHeader(props: PublicHeaderProps) {
         <div className='flex h-full flex-col justify-between px-8 pt-20 pb-10'>
           <nav className='flex flex-col gap-1'>
             {links.map((link, i) => {
-              const isActive = pathname === link.href
+              const isActive =
+                pathname === link.href ||
+                (link.href !== '/' && pathname.startsWith(`${link.href}/`))
               const linkClassName = cn(
                 'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
                 mobileOpen
                   ? 'translate-y-0 opacity-100'
                   : 'translate-y-4 opacity-0',
-                isActive ? 'text-foreground' : 'text-muted-foreground',
+                navLinkTone(isActive, isMarketing, false),
                 link.disabled && 'pointer-events-none opacity-50'
               )
               const transitionStyle = {
@@ -364,7 +424,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               if (link.external) {
                 return (
                   <a
-                    key={i}
+                    key={`ext-${link.href}`}
                     href={link.href}
                     target='_blank'
                     rel='noopener noreferrer'
@@ -380,7 +440,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               }
               return (
                 <Link
-                  key={i}
+                  key={link.href}
                   to={link.href}
                   disabled={link.disabled}
                   onClick={(event) => handleNavLinkClick(event, link, true)}
