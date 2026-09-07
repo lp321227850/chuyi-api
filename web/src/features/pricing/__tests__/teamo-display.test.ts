@@ -171,15 +171,26 @@ describe('getSiteDiscountFold', () => {
     ).toBe('0.8')
   })
 
-  it('uses the cheapest configured group ratio when enable_groups keys do not match', () => {
-    expect(
-      getSiteDiscountFold(
-        model({
-          enable_groups: ['openai'],
-          group_ratio: { default: 0.08, vip: 0.1 },
-        })
-      )
-    ).toBe('0.8')
+  it('does not invent a fold from unrelated group_ratio keys', () => {
+    const mismatched = model({
+      enable_groups: ['openai'],
+      group_ratio: { default: 0.08, vip: 0.1 },
+    })
+    expect(getDisplayGroupRatio(mismatched)).toBe(1)
+    expect(getDisplayGroupRatio(mismatched, 'default')).toBe(1)
+    expect(getSiteDiscountFold(mismatched)).toBeNull()
+    expect(getSiteDiscountFold(mismatched, 'default')).toBeNull()
+  })
+
+  it('uses a group ratio only when the model is enabled for that billing group', () => {
+    const vipOnly = model({
+      enable_groups: ['vip'],
+      group_ratio: { default: 0.5, vip: 0.08 },
+    })
+    expect(getDisplayGroupRatio(vipOnly, 'vip')).toBe(0.08)
+    expect(getDisplayGroupRatio(vipOnly, 'default')).toBe(1)
+    expect(getSiteDiscountFold(vipOnly, 'vip')).toBe('0.8')
+    expect(getSiteDiscountFold(vipOnly, 'default')).toBeNull()
     expect(
       getDisplayGroupRatio(
         model({
@@ -188,6 +199,15 @@ describe('getSiteDiscountFold', () => {
         })
       )
     ).toBe(0.08)
+    expect(
+      getDisplayGroupRatio(
+        model({
+          enable_groups: ['all'],
+          group_ratio: { default: 0.2, vip: 0.08 },
+        }),
+        'default'
+      )
+    ).toBe(0.2)
   })
 
   it('shows a fold when the effective model ratio is below the configured base ratio', () => {
@@ -222,6 +242,27 @@ describe('getMaxSiteDiscountFold', () => {
         }),
       ])
     ).toBe('0.8')
+  })
+
+  it('ignores folds from models that are not enabled for the selected group', () => {
+    expect(
+      getMaxSiteDiscountFold(
+        [
+          model({
+            id: 1,
+            enable_groups: ['openai'],
+            group_ratio: { default: 0.08 },
+          }),
+          model({
+            id: 2,
+            model_name: 'in-group',
+            enable_groups: ['default'],
+            group_ratio: { default: 0.5 },
+          }),
+        ],
+        'default'
+      )
+    ).toBe('5')
   })
 })
 
@@ -282,6 +323,27 @@ describe('getMaxSiteDiscountPercent', () => {
         }),
       ])
     ).toBe(90)
+  })
+
+  it('ignores discounts from models that are not enabled for the selected group', () => {
+    expect(
+      getMaxSiteDiscountPercent(
+        [
+          model({
+            id: 1,
+            enable_groups: ['openai'],
+            group_ratio: { default: 0.1 },
+          }),
+          model({
+            id: 2,
+            model_name: 'in-group',
+            enable_groups: ['default'],
+            group_ratio: { default: 0.5 },
+          }),
+        ],
+        'default'
+      )
+    ).toBe(50)
   })
 })
 
@@ -356,6 +418,29 @@ describe('pickFeaturedModels', () => {
       'full-a',
       'full-b',
     ])
+  })
+
+  it('does not feature a model that is not enabled for the selected group', () => {
+    const picked = pickFeaturedModels(
+      [
+        model({
+          id: 1,
+          model_name: 'other-group',
+          vendor_name: 'OpenAI',
+          enable_groups: ['openai'],
+          group_ratio: { default: 0.1 },
+        }),
+        model({
+          id: 2,
+          model_name: 'in-group',
+          vendor_name: 'Anthropic',
+          enable_groups: ['default'],
+          group_ratio: { default: 0.5 },
+        }),
+      ],
+      { selectedGroup: 'default', limit: 3 }
+    )
+    expect(picked.map((item) => item.model_name)).toEqual(['in-group'])
   })
 })
 

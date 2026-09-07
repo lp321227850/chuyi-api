@@ -317,41 +317,44 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
   return (
     <div className='space-y-4'>
       <TooltipProvider delay={100}>
-        <div data-chuyi-pricing-table=''>
+        <div
+          data-chuyi-pricing-table=''
+          className='max-lg:-mx-3 max-lg:overflow-x-auto max-lg:overflow-y-hidden max-lg:px-3'
+        >
           <table className='w-full min-w-[920px] border-collapse text-left text-sm'>
             <thead>
               <tr className='text-muted-foreground border-b border-dashed border-[var(--chuyi-line,#e6e0d6)] text-xs'>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Model')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Context')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Input (list)')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Output (list)')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
                   {t('Input (Chuyi)')}
                   <span
                     aria-hidden
                     className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
                   />
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3 font-medium'>
+                <th className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3 font-medium'>
                   {t('Output (Chuyi)')}
                   <span
                     aria-hidden
                     className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
                   />
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='max-lg:static max-sm:hidden lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium sm:table-cell'>
                   {t('Provider')}
                 </th>
                 <th
-                  className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
+                  className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
                   title={t('24h request success rate')}
                 >
                   {t('Uptime (SLA)')}
@@ -490,7 +493,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                         fold={fold}
                       />
                     </td>
-                    <td className='px-3 py-3'>
+                    <td className='max-sm:hidden px-3 py-3 sm:table-cell'>
                       <span className='inline-flex size-7 items-center justify-center rounded-full border border-[var(--chuyi-line,#e6e0d6)] bg-white'>
                         {vendorIcon ?? (
                           <span className='text-[10px] font-semibold'>

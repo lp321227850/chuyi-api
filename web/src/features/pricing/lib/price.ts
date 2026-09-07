@@ -20,7 +20,11 @@ import { formatCurrencyFromUSD } from '@/lib/currency'
 
 import { QUOTA_TYPE_VALUES, TOKEN_UNIT_DIVISORS } from '../constants'
 import type { PricingModel, TokenUnit, PriceType } from '../types'
-import { getConfiguredGroupRatio, getDisplayGroupRatio } from './model-helpers'
+import {
+  getConfiguredGroupRatio,
+  getDisplayGroupRatio,
+  modelAppliesToBillingGroup,
+} from './model-helpers'
 
 // ----------------------------------------------------------------------------
 // Price Calculation Utilities
@@ -352,6 +356,7 @@ export function getMaxSiteDiscountFold(
 ): string | null {
   let minRatio: number | null = null
   for (const model of models) {
+    if (!modelAppliesToBillingGroup(model, selectedGroup)) continue
     const ratio = getSiteDiscountRatio(model, selectedGroup)
     if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) continue
     if (minRatio == null || ratio < minRatio) {

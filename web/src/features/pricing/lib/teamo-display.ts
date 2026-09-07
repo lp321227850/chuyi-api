@@ -22,7 +22,10 @@ import {
   type ParsedTier,
   type TierCondition,
 } from './billing-expr'
-import { isTokenBasedModel } from './model-helpers'
+import {
+  isTokenBasedModel,
+  modelAppliesToBillingGroup,
+} from './model-helpers'
 import { getSiteDiscountPercent } from './price'
 
 export function formatContextWindow(length?: number): string {
@@ -161,6 +164,7 @@ export function getMaxSiteDiscountPercent(
 ): number | null {
   let maxPercent: number | null = null
   for (const model of models) {
+    if (!modelAppliesToBillingGroup(model, selectedGroup)) continue
     const percent = getSiteDiscountPercent(model, selectedGroup)
     if (percent == null) continue
     if (maxPercent == null || percent > maxPercent) {
@@ -206,7 +210,11 @@ export function pickFeaturedModels(
   const limit = options?.limit ?? TEAMO_FEATURED_COUNT
   if (limit <= 0) return []
 
-  const tokenModels = models.filter(isTokenBasedModel)
+  const tokenModels = models.filter(
+    (model) =>
+      isTokenBasedModel(model) &&
+      modelAppliesToBillingGroup(model, options?.selectedGroup)
+  )
   const discounted: PricingModel[] = []
   const others: PricingModel[] = []
   for (const model of tokenModels) {

@@ -48,7 +48,8 @@ function model(overrides: Partial<PricingModel> = {}): PricingModel {
 function renderTable(
   models: PricingModel[],
   successRates: Record<string, number> = {},
-  recentSuccessRates?: Record<string, number[]>
+  recentSuccessRates?: Record<string, number[]>,
+  selectedGroup?: string
 ) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -59,6 +60,7 @@ function renderTable(
         models={models}
         successRates={successRates}
         recentSuccessRates={recentSuccessRates}
+        selectedGroup={selectedGroup}
       />
     </QueryClientProvider>
   )
@@ -159,11 +161,16 @@ describe('TeamoPricingTable', () => {
     const { container } = renderTable([model()])
     const wrapper = container.querySelector('[data-chuyi-pricing-table]')
     expect(wrapper).not.toBeNull()
-    expect(wrapper?.className).not.toMatch(/overflow-x-auto/)
+    expect(wrapper?.className).toMatch(/max-lg:overflow-x-auto/)
+    expect(wrapper?.className).not.toMatch(/(^|\s)overflow-x-auto/)
     const headerCell = screen.getByText('Model').closest('th')
     expect(headerCell).not.toBeNull()
-    expect(headerCell?.className).toMatch(/sticky/)
+    expect(headerCell?.className).toMatch(/lg:sticky/)
+    expect(headerCell?.className).toMatch(/max-lg:static/)
     expect(headerCell?.className).toMatch(/chuyi-header-offset/)
+    const providerHeader = screen.getByText('Provider').closest('th')
+    expect(providerHeader?.className).toMatch(/max-sm:hidden/)
+    expect(providerHeader?.className).toMatch(/sm:table-cell/)
   })
 
   it('shows configured context from catalog text when context_length is absent', () => {
@@ -179,16 +186,22 @@ describe('TeamoPricingTable', () => {
     expect(screen.getByText('200K')).toBeVisible()
   })
 
-  it('shows a fold badge when enable_groups do not match the group_ratio keys', () => {
-    renderTable([
-      model({
-        model_name: 'mismatched-groups',
-        enable_groups: ['openai'],
-        group_ratio: { default: 0.1 },
-        context_length: undefined,
-      }),
-    ])
-    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
+  it('does not show a fold badge when enable_groups do not match the billing group', () => {
+    renderTable(
+      [
+        model({
+          model_name: 'mismatched-groups',
+          enable_groups: ['openai'],
+          group_ratio: { default: 0.1 },
+          context_length: undefined,
+        }),
+      ],
+      {},
+      undefined,
+      'default'
+    )
+    expect(screen.queryByText('1×')).not.toBeInTheDocument()
+    expect(screen.queryByText('90% off')).not.toBeInTheDocument()
   })
 
   it('uses list cache for the list column and site cache for Chuyi', () => {
