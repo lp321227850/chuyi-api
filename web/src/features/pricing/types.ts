@@ -56,6 +56,10 @@ export type PricingModel = {
   model_ratio: number
   completion_ratio: number
   model_price?: number
+  /** Built-in / configured list model ratio when the live ratio is discounted. */
+  base_model_ratio?: number
+  /** Built-in / configured list per-request price when the live price is discounted. */
+  base_model_price?: number
   cache_ratio?: number | null
   create_cache_ratio?: number | null
   image_ratio?: number | null

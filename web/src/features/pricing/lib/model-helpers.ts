@@ -74,13 +74,33 @@ export function getDisplayGroupRatio(
     return getConfiguredGroupRatio(groupRatio, selectedGroup)
   }
 
-  if (modelEnableGroups.length === 0) {
-    return 1
+  const treatAsAll =
+    modelEnableGroups.length === 0 || modelEnableGroups.includes('all')
+  const candidateGroups = treatAsAll
+    ? Object.keys(groupRatio)
+    : modelEnableGroups
+
+  const matchedMin = minConfiguredGroupRatio(groupRatio, candidateGroups)
+  if (matchedMin != null) return matchedMin
+
+  if (!treatAsAll) {
+    const fallbackMin = minConfiguredGroupRatio(
+      groupRatio,
+      Object.keys(groupRatio)
+    )
+    if (fallbackMin != null) return fallbackMin
   }
 
-  let minRatio = Number.POSITIVE_INFINITY
+  return 1
+}
 
-  for (const group of modelEnableGroups) {
+function minConfiguredGroupRatio(
+  groupRatio: Record<string, number>,
+  groups: string[]
+): number | null {
+  let minRatio = Number.POSITIVE_INFINITY
+  for (const group of groups) {
+    if (EXCLUDED_GROUPS.includes(group) || group === 'all') continue
     const ratio = groupRatio[group]
     if (
       typeof ratio === 'number' &&
@@ -90,8 +110,7 @@ export function getDisplayGroupRatio(
       minRatio = ratio
     }
   }
-
-  return minRatio === Number.POSITIVE_INFINITY ? 1 : minRatio
+  return minRatio === Number.POSITIVE_INFINITY ? null : minRatio
 }
 
 /**

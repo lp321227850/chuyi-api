@@ -31,7 +31,7 @@ export function DiscountFoldBadge(props: {
     <Badge
       variant='default'
       className={cn(
-        'ml-1.5 h-auto rounded-[3px] border-transparent bg-[var(--chuyi-ink,#141414)] px-1.5 py-0.5 text-[10px] font-semibold text-white',
+        'ml-1.5 h-auto rounded-[3px] border-transparent bg-[var(--chuyi-ink,#141414)] px-1.5 py-1 text-xs font-semibold text-white',
         props.className
       )}
     >

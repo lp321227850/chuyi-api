@@ -51,6 +51,8 @@ import {
   getComplementContextLengthLabel,
   getContextLengthTiers,
   hasCachePrice,
+  lookupNamedRecord,
+  resolveConfiguredContextLength,
   TEAMO_TABLE_PREVIEW_COUNT,
 } from '../lib/teamo-display'
 import type { PricingModel, TokenUnit } from '../types'
@@ -210,8 +212,12 @@ function SuccessHealthCell(props: { rate?: number; samples?: number[] }) {
   const samples = (props.samples ?? []).filter(
     (sample) => Number.isFinite(sample) && sample >= 0 && sample <= 100
   )
+  let barRates = samples
+  if (barRates.length === 0 && hasRate) {
+    barRates = [rate]
+  }
   const seenRates = new Map<number, number>()
-  const labeledSamples = samples.map((sample) => {
+  const labeledSamples = barRates.map((sample) => {
     const count = (seenRates.get(sample) ?? 0) + 1
     seenRates.set(sample, count)
     return { rate: sample, key: `${sample}:${count}` }
@@ -229,14 +235,14 @@ function SuccessHealthCell(props: { rate?: number; samples?: number[] }) {
         <div
           role='img'
           aria-label={t('Recent success-rate samples')}
-          className='mt-1 flex h-3.5 items-end gap-px'
+          className='mt-1.5 flex h-6 items-end gap-0.5'
         >
           {labeledSamples.map((sample) => (
             <span
               key={sample.key}
               aria-hidden
               className={cn(
-                'h-full w-[2px] rounded-[1px]',
+                'h-full w-2 rounded-[2px]',
                 getSuccessRateDotClass(sample.rate)
               )}
             />
@@ -295,41 +301,41 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
   return (
     <div className='space-y-4'>
       <TooltipProvider delay={100}>
-        <div className='max-md:overflow-x-auto'>
+        <div data-chuyi-pricing-table=''>
           <table className='w-full min-w-[920px] border-collapse text-left text-sm'>
             <thead>
               <tr className='text-muted-foreground border-b border-dashed border-[var(--chuyi-line,#e6e0d6)] text-xs'>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Model')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Context')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Input (list)')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Output (list)')}
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
                   {t('Input (Chuyi)')}
                   <span
                     aria-hidden
                     className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
                   />
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3 font-medium'>
                   {t('Output (Chuyi)')}
                   <span
                     aria-hidden
                     className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
                   />
                 </th>
-                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
                   {t('Provider')}
                 </th>
                 <th
-                  className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
+                  className='sticky top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
                   title={t('24h request success rate')}
                 >
                   {t('Uptime (SLA)')}
@@ -438,7 +444,9 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                       </div>
                     </td>
                     <td className='text-muted-foreground px-3 py-3 tabular-nums'>
-                      {formatContextWindow(model.context_length)}
+                      {formatContextWindow(
+                        resolveConfiguredContextLength(model)
+                      )}
                     </td>
                     <td className='px-3 py-3'>
                       <PriceStack
@@ -477,8 +485,11 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                     </td>
                     <td className='px-3 py-3'>
                       <SuccessHealthCell
-                        rate={successRates[model.model_name]}
-                        samples={recentSuccessRates[model.model_name]}
+                        rate={lookupNamedRecord(successRates, model.model_name)}
+                        samples={lookupNamedRecord(
+                          recentSuccessRates,
+                          model.model_name
+                        )}
                       />
                     </td>
                   </tr>

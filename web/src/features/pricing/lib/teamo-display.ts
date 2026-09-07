@@ -38,6 +38,108 @@ export function formatContextWindow(length?: number): string {
   return String(length)
 }
 
+const MIN_CONFIGURED_CONTEXT = 4_000
+const MAX_CONFIGURED_CONTEXT = 10_000_000
+
+const CONTEXT_LABEL_BEFORE =
+  /(?:context(?:\s*window)?|ctx|上下文(?:窗口)?)[:\s：-]*([0-9]+(?:\.[0-9]+)?)\s*([kKmM])\b/i
+const CONTEXT_LABEL_AFTER =
+  /([0-9]+(?:\.[0-9]+)?)\s*([kKmM])\s*(?:context(?:\s*window)?|ctx|上下文(?:窗口)?)/i
+const CONTEXT_TOKEN_COUNT =
+  /(?:context(?:\s*window)?|ctx|上下文(?:窗口)?)[:\s：-]*([0-9]{4,})\b/i
+const NAME_CONTEXT_WINDOW =
+  /(?:^|[-_/])(\d{2,})([kK])(?:[-_/]|$)|(?:^|[-_/])(\d+(?:\.\d+)?)([mM])(?:[-_/]|$)/g
+
+function tokensFromWindowAmount(amount: number, unit: string): number | undefined {
+  if (!Number.isFinite(amount) || amount <= 0) return undefined
+  const lower = unit.toLowerCase()
+  let tokens = amount
+  if (lower === 'k') tokens = amount * 1_000
+  if (lower === 'm') tokens = amount * 1_000_000
+  if (tokens < MIN_CONFIGURED_CONTEXT || tokens > MAX_CONFIGURED_CONTEXT) {
+    return undefined
+  }
+  return tokens
+}
+
+function parseContextLengthFromText(text: string): number | undefined {
+  if (!text.trim()) return undefined
+  const labeled = text.match(CONTEXT_LABEL_BEFORE) ?? text.match(CONTEXT_LABEL_AFTER)
+  if (labeled) {
+    const tokens = tokensFromWindowAmount(Number(labeled[1]), labeled[2])
+    if (tokens != null) return tokens
+  }
+  const tokenCount = text.match(CONTEXT_TOKEN_COUNT)
+  if (tokenCount) {
+    const tokens = Number(tokenCount[1])
+    if (
+      Number.isFinite(tokens) &&
+      tokens >= MIN_CONFIGURED_CONTEXT &&
+      tokens <= MAX_CONFIGURED_CONTEXT
+    ) {
+      return tokens
+    }
+  }
+  return undefined
+}
+
+function parseContextLengthFromModelName(name: string): number | undefined {
+  NAME_CONTEXT_WINDOW.lastIndex = 0
+  let match: RegExpExecArray | null
+  let found: number | undefined
+  while ((match = NAME_CONTEXT_WINDOW.exec(name)) != null) {
+    const amount = Number(match[1] || match[3])
+    const unit = match[2] || match[4]
+    const tokens = tokensFromWindowAmount(amount, unit)
+    if (tokens != null) found = tokens
+  }
+  return found
+}
+
+export function resolveConfiguredContextLength(
+  model: PricingModel
+): number | undefined {
+  if (
+    model.context_length != null &&
+    Number.isFinite(model.context_length) &&
+    model.context_length > 0
+  ) {
+    return model.context_length
+  }
+  const fromText = parseContextLengthFromText(
+    [model.description, model.tags].filter(Boolean).join(' ')
+  )
+  if (fromText != null) return fromText
+  return parseContextLengthFromModelName(model.model_name)
+}
+
+export function perfModelAliases(name: string): string[] {
+  const trimmed = name.trim()
+  if (!trimmed) return []
+  const lower = trimmed.toLowerCase()
+  const aliases = new Set<string>([trimmed, lower])
+  const parts = lower.split('/')
+  if (parts.length > 1) {
+    aliases.add(parts.at(-1) ?? '')
+    aliases.add(parts.slice(1).join('/'))
+  }
+  return [...aliases].filter(Boolean)
+}
+
+export function lookupNamedRecord<T>(
+  record: Record<string, T>,
+  name: string
+): T | undefined {
+  if (Object.hasOwn(record, name)) return record[name]
+  const wanted = new Set(perfModelAliases(name))
+  for (const [key, value] of Object.entries(record)) {
+    if (perfModelAliases(key).some((alias) => wanted.has(alias))) {
+      return value
+    }
+  }
+  return undefined
+}
+
 function stripPointZero(value: number): string {
   return value.toFixed(1).replace(/\.0$/, '')
 }

@@ -114,7 +114,11 @@ describe('TeamoPricingTable', () => {
 
     expect(screen.getByText('97.50%')).toBeVisible()
     expect(screen.queryByText('—')).not.toBeInTheDocument()
-    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    const sparkline = screen.getByRole('img', {
+      name: 'Recent success-rate samples',
+    })
+    expect(sparkline.querySelectorAll('[aria-hidden]')).toHaveLength(1)
+    expect(sparkline.className).toMatch(/h-6/)
   })
 
   it('draws one health segment per real recent success sample', () => {
@@ -125,6 +129,56 @@ describe('TeamoPricingTable', () => {
     })
     expect(sparkline).toBeVisible()
     expect(sparkline.querySelectorAll('[aria-hidden]')).toHaveLength(3)
+    expect(sparkline.className).toMatch(/h-6/)
+  })
+
+  it('matches SLA rows when the summary uses a vendor-prefixed model name', () => {
+    renderTable(
+      [model({ model_name: 'gpt-4o', context_length: undefined })],
+      { 'OpenAI/gpt-4o': 99.1 },
+      { 'OpenAI/gpt-4o': [98, 99.1] }
+    )
+
+    expect(screen.getByText('99.10%')).toBeVisible()
+    expect(
+      screen.getByRole('img', { name: 'Recent success-rate samples' })
+    ).toBeVisible()
+  })
+
+  it('keeps the table header sticky below the marketing nav and does not clip it', () => {
+    const { container } = renderTable([model()])
+    const wrapper = container.querySelector('[data-chuyi-pricing-table]')
+    expect(wrapper).not.toBeNull()
+    expect(wrapper?.className).not.toMatch(/overflow-x-auto/)
+    const headerCell = screen.getByText('Model').closest('th')
+    expect(headerCell).not.toBeNull()
+    expect(headerCell?.className).toMatch(/sticky/)
+    expect(headerCell?.className).toMatch(/chuyi-header-offset/)
+  })
+
+  it('shows configured context from catalog text when context_length is absent', () => {
+    renderTable([
+      model({
+        model_name: 'catalog-context',
+        context_length: undefined,
+        description: 'Official 200K context window',
+        enable_groups: ['default'],
+        group_ratio: { default: 1 },
+      }),
+    ])
+    expect(screen.getByText('200K')).toBeVisible()
+  })
+
+  it('shows a fold badge when enable_groups do not match the group_ratio keys', () => {
+    renderTable([
+      model({
+        model_name: 'mismatched-groups',
+        enable_groups: ['openai'],
+        group_ratio: { default: 0.1 },
+        context_length: undefined,
+      }),
+    ])
+    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
   })
 
   it('uses list cache for the list column and site cache for Chuyi', () => {

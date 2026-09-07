@@ -26,6 +26,8 @@ type Pricing struct {
 	QuotaType              int                                  `json:"quota_type"`
 	ModelRatio             float64                              `json:"model_ratio"`
 	ModelPrice             float64                              `json:"model_price"`
+	BaseModelRatio         *float64                             `json:"base_model_ratio,omitempty"`
+	BaseModelPrice         *float64                             `json:"base_model_price,omitempty"`
 	OwnerBy                string                               `json:"owner_by"`
 	CompletionRatio        float64                              `json:"completion_ratio"`
 	CacheRatio             *float64                             `json:"cache_ratio,omitempty"`
@@ -379,14 +381,23 @@ func updatePricing() {
 			pricing.VendorID = meta.VendorID
 		}
 		modelPrice, findPrice := ratio_setting.GetModelPrice(model, false)
+		matchedName := ratio_setting.FormatMatchingModelName(model)
 		if findPrice {
 			pricing.ModelPrice = modelPrice
 			pricing.QuotaType = 1
+			if defaultPrice, ok := ratio_setting.GetDefaultModelPriceMap()[matchedName]; ok && defaultPrice > 0 {
+				price := defaultPrice
+				pricing.BaseModelPrice = &price
+			}
 		} else {
 			modelRatio, _, _ := ratio_setting.GetModelRatio(model)
 			pricing.ModelRatio = modelRatio
 			pricing.CompletionRatio = ratio_setting.GetCompletionRatio(model)
 			pricing.QuotaType = 0
+			if defaultRatio, ok := ratio_setting.GetDefaultModelRatioMap()[matchedName]; ok && defaultRatio > 0 {
+				ratio := defaultRatio
+				pricing.BaseModelRatio = &ratio
+			}
 		}
 		if cacheRatio, ok := ratio_setting.GetCacheRatio(model); ok {
 			pricing.CacheRatio = &cacheRatio

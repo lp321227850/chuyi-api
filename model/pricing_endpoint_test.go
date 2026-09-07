@@ -292,3 +292,23 @@ func TestCacheUpdateChannelSyncsAdvancedCustomConfig(t *testing.T) {
 
 	assert.Nil(t, channel2advancedCustomConfig[401])
 }
+
+func TestPricingIncludesBuiltInBaseModelRatio(t *testing.T) {
+	resetPricingEndpointTestTables(t)
+
+	insertPricingEndpointChannel(t, 201, constant.ChannelTypeOpenAI, dto.ChannelOtherSettings{})
+	insertPricingEndpointAbility(t, 201, "gpt-4o")
+
+	InitChannelCache()
+	pricings := GetPricing()
+	var found *Pricing
+	for i := range pricings {
+		if pricings[i].ModelName == "gpt-4o" {
+			found = &pricings[i]
+			break
+		}
+	}
+	require.NotNil(t, found)
+	require.NotNil(t, found.BaseModelRatio)
+	assert.Equal(t, 1.25, *found.BaseModelRatio)
+}

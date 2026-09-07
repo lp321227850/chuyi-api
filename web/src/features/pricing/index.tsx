@@ -23,7 +23,6 @@ import { AnimateInView } from '@/components/animate-in-view'
 import { StatsStrip } from '@/components/chuyi'
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
-import { PageTransition } from '@/components/page-transition'
 
 import {
   LoadingSkeleton,
@@ -189,7 +188,7 @@ export function Pricing() {
           aria-hidden
           className='chuyi-mesh pointer-events-none absolute inset-x-0 top-0 h-[28rem] opacity-70'
         />
-        <PageTransition className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
+        <div className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
           <header id='pricing' className='chuyi-enter mb-8 pt-4 sm:mb-10'>
             <h1 className='text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'>
               {pricingTitle}
@@ -199,15 +198,17 @@ export function Pricing() {
             </p>
           </header>
 
-          <FeaturedModelCards
-            models={featuredModels}
-            priceRate={priceRate}
-            usdExchangeRate={usdExchangeRate}
-            tokenUnit={tokenUnit}
-            showRechargePrice={showRechargePrice}
-            selectedGroup={groupFilter}
-            onModelClick={handleModelClick}
-          />
+          {(models?.length ?? 0) > 0 ? (
+            <FeaturedModelCards
+              models={featuredModels}
+              priceRate={priceRate}
+              usdExchangeRate={usdExchangeRate}
+              tokenUnit={tokenUnit}
+              showRechargePrice={showRechargePrice}
+              selectedGroup={groupFilter}
+              onModelClick={handleModelClick}
+            />
+          ) : null}
 
           <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
             <VendorFilterPills
@@ -282,7 +283,7 @@ export function Pricing() {
               showRechargePrice={showRechargePrice}
             />
           )}
-        </PageTransition>
+        </div>
         <AnimateInView>
           <StatsStrip />
         </AnimateInView>

@@ -58,13 +58,13 @@ For commercial licensing, please contact support@quantumnous.com
   --sidebar-accent: #fff1e4;
   --sidebar-accent-foreground: #141414;
   --sidebar-border: #e6e0d6;
-  --chuyi-header-offset: 4.25rem;
+  --chuyi-header-offset: 5.25rem;
   background-color: var(--chuyi-cream);
   color: var(--chuyi-ink);
 }
 
 [data-chuyi-theme][data-chuyi-announce='on'] {
-  --chuyi-header-offset: 6.5rem;
+  --chuyi-header-offset: 7.25rem;
 }
 
 .chuyi-mesh {

@@ -18,11 +18,15 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { describe, expect, it } from 'vitest'
 
+import { getDisplayGroupRatio } from '../lib/model-helpers'
 import {
   formatDiscountFold,
+  formatListPrice,
+  formatPrice,
   getMaxSiteDiscountFold,
   getSiteDiscountFold,
   getSiteDiscountPercent,
+  stripTrailingZeros,
 } from '../lib/price'
 import {
   formatContextLengthCondition,
@@ -31,7 +35,9 @@ import {
   getContextLengthTiers,
   getMaxSiteDiscountPercent,
   hasCachePrice,
+  lookupNamedRecord,
   pickFeaturedModels,
+  resolveConfiguredContextLength,
   sortVendorsForPricingPills,
 } from '../lib/teamo-display'
 import type { PricingModel } from '../types'
@@ -59,6 +65,58 @@ describe('formatContextWindow', () => {
     expect(formatContextWindow(1_000_000)).toBe('1M')
     expect(formatContextWindow(200_000)).toBe('200K')
     expect(formatContextWindow(512)).toBe('512')
+  })
+})
+
+describe('resolveConfiguredContextLength', () => {
+  it('prefers an explicit context_length field', () => {
+    expect(
+      resolveConfiguredContextLength(
+        model({
+          context_length: 128_000,
+          description: 'Official 200K context window',
+        })
+      )
+    ).toBe(128_000)
+  })
+
+  it('reads a configured window from description or tags', () => {
+    expect(
+      resolveConfiguredContextLength(
+        model({ description: 'Official 200K context window' })
+      )
+    ).toBe(200_000)
+    expect(
+      resolveConfiguredContextLength(model({ tags: 'chat, context:1m' }))
+    ).toBe(1_000_000)
+  })
+
+  it('reads a configured window encoded in the model name', () => {
+    expect(
+      resolveConfiguredContextLength(model({ model_name: 'gpt-4-32k' }))
+    ).toBe(32_000)
+  })
+
+  it('does not invent a window from unrelated catalog text', () => {
+    expect(
+      resolveConfiguredContextLength(
+        model({
+          model_name: 'gpt-4o',
+          description: 'Flagship chat model',
+          tags: 'vision',
+        })
+      )
+    ).toBeUndefined()
+  })
+})
+
+describe('lookupNamedRecord', () => {
+  it('matches vendor-prefixed and case-shifted model names', () => {
+    const rates = { 'OpenAI/gpt-4o': 97.5, 'claude-sonnet-4': 99.1 }
+    expect(lookupNamedRecord(rates, 'gpt-4o')).toBe(97.5)
+    expect(lookupNamedRecord(rates, 'openai/GPT-4O')).toBe(97.5)
+    expect(lookupNamedRecord(rates, 'Claude-Sonnet-4')).toBe(99.1)
+    expect(lookupNamedRecord(rates, 'missing-model')).toBeUndefined()
   })
 })
 
@@ -112,6 +170,38 @@ describe('getSiteDiscountFold', () => {
       )
     ).toBe('0.8')
   })
+
+  it('uses the cheapest configured group ratio when enable_groups keys do not match', () => {
+    expect(
+      getSiteDiscountFold(
+        model({
+          enable_groups: ['openai'],
+          group_ratio: { default: 0.08, vip: 0.1 },
+        })
+      )
+    ).toBe('0.8')
+    expect(
+      getDisplayGroupRatio(
+        model({
+          enable_groups: ['all'],
+          group_ratio: { default: 0.2, vip: 0.08 },
+        })
+      )
+    ).toBe(0.08)
+  })
+
+  it('shows a fold when the effective model ratio is below the configured base ratio', () => {
+    expect(
+      getSiteDiscountFold(
+        model({
+          model_ratio: 0.1,
+          base_model_ratio: 1.25,
+          enable_groups: ['default'],
+          group_ratio: { default: 1 },
+        })
+      )
+    ).toBe('0.8')
+  })
 })
 
 describe('getMaxSiteDiscountFold', () => {
@@ -132,6 +222,23 @@ describe('getMaxSiteDiscountFold', () => {
         }),
       ])
     ).toBe('0.8')
+  })
+})
+
+describe('formatListPrice versus site price', () => {
+  it('uses the configured base ratio for list when the model ratio is discounted', () => {
+    const discounted = model({
+      model_ratio: 0.125,
+      base_model_ratio: 1.25,
+      enable_groups: ['default'],
+      group_ratio: { default: 1 },
+    })
+    expect(stripTrailingZeros(formatListPrice(discounted, 'input', 'M'))).toBe(
+      '$2.5'
+    )
+    expect(stripTrailingZeros(formatPrice(discounted, 'input', 'M'))).toBe(
+      '$0.25'
+    )
   })
 })
 

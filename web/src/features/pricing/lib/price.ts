@@ -271,11 +271,55 @@ export function formatRequestPrice(
   })
 }
 
+export function getConfiguredModelDiscountRatio(model: PricingModel): number {
+  if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
+    const base = model.base_model_price
+    const current = model.model_price
+    if (
+      typeof base === 'number' &&
+      Number.isFinite(base) &&
+      base > 0 &&
+      typeof current === 'number' &&
+      Number.isFinite(current) &&
+      current > 0 &&
+      current < base
+    ) {
+      return current / base
+    }
+    return 1
+  }
+
+  const base = model.base_model_ratio
+  const current = model.model_ratio
+  if (
+    typeof base === 'number' &&
+    Number.isFinite(base) &&
+    base > 0 &&
+    typeof current === 'number' &&
+    Number.isFinite(current) &&
+    current > 0 &&
+    current < base
+  ) {
+    return current / base
+  }
+  return 1
+}
+
+export function getSiteDiscountRatio(
+  model: PricingModel,
+  selectedGroup?: string
+): number {
+  return (
+    getDisplayGroupRatio(model, selectedGroup) *
+    getConfiguredModelDiscountRatio(model)
+  )
+}
+
 export function getSiteDiscountPercent(
   model: PricingModel,
   selectedGroup?: string
 ): number | null {
-  const ratio = getDisplayGroupRatio(model, selectedGroup)
+  const ratio = getSiteDiscountRatio(model, selectedGroup)
   if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
     return null
   }
@@ -299,7 +343,7 @@ export function getSiteDiscountFold(
   model: PricingModel,
   selectedGroup?: string
 ): string | null {
-  return formatDiscountFold(getDisplayGroupRatio(model, selectedGroup))
+  return formatDiscountFold(getSiteDiscountRatio(model, selectedGroup))
 }
 
 export function getMaxSiteDiscountFold(
@@ -308,7 +352,7 @@ export function getMaxSiteDiscountFold(
 ): string | null {
   let minRatio: number | null = null
   for (const model of models) {
-    const ratio = getDisplayGroupRatio(model, selectedGroup)
+    const ratio = getSiteDiscountRatio(model, selectedGroup)
     if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) continue
     if (minRatio == null || ratio < minRatio) {
       minRatio = ratio
@@ -325,8 +369,13 @@ export function formatListPrice(
   priceRate = 1,
   usdExchangeRate = 1
 ): string {
+  const modelDiscount = getConfiguredModelDiscountRatio(model)
+
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     let priceInUSD = model.model_price || 0
+    if (modelDiscount > 0 && modelDiscount < 1) {
+      priceInUSD = priceInUSD / modelDiscount
+    }
     priceInUSD = applyRechargeRate(
       priceInUSD,
       showWithRecharge,
@@ -340,7 +389,9 @@ export function formatListPrice(
     })
   }
 
-  let priceInUSD = calculateTokenPrice(model, type, 1)
+  const listMultiplier =
+    modelDiscount > 0 && modelDiscount < 1 ? 1 / modelDiscount : 1
+  let priceInUSD = calculateTokenPrice(model, type, listMultiplier)
   priceInUSD = applyRechargeRate(
     priceInUSD,
     showWithRecharge,
