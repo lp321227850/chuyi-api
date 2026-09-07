@@ -21,6 +21,7 @@ import { CircleHelp } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { fetchPublicPerfSummary } from '@/components/chuyi/public-stats'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -28,7 +29,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { getPerfMetricsSummary } from '@/features/performance-metrics/api'
 import {
   formatUptimePct,
   getSuccessRateDotClass,
@@ -42,7 +42,7 @@ import { getDisplayGroupRatio } from '../lib/model-helpers'
 import {
   formatListPrice,
   formatPrice,
-  getSiteDiscountPercent,
+  getSiteDiscountFold,
   stripTrailingZeros,
 } from '../lib/price'
 import {
@@ -54,6 +54,7 @@ import {
   TEAMO_TABLE_PREVIEW_COUNT,
 } from '../lib/teamo-display'
 import type { PricingModel, TokenUnit } from '../types'
+import { DiscountFoldBadge } from './discount-fold-badge'
 
 export interface TeamoPricingTableProps {
   models: PricingModel[]
@@ -67,36 +68,34 @@ export interface TeamoPricingTableProps {
   recentSuccessRates?: Record<string, number[]>
 }
 
-function DiscountBadge(props: { percent: number | null }) {
-  const { t } = useTranslation()
-  if (props.percent == null) return null
-  return (
-    <span className='ml-1.5 inline-flex rounded-full bg-[var(--chuyi-ink,#141414)] px-1.5 py-0.5 text-[10px] font-semibold text-white'>
-      {t('{{percent}}% off', { percent: props.percent })}
-    </span>
-  )
-}
-
 function PriceStack(props: {
   primary: string
   secondary?: string
   extra?: ReactNode
   muted?: boolean
-  discount?: number | null
+  accentSecondary?: boolean
+  fold?: string | null
 }) {
   return (
     <div>
       <div
         className={cn(
           'flex flex-wrap items-center',
-          props.muted ? 'text-muted-foreground' : 'font-semibold'
+          props.muted ? 'text-muted-foreground' : 'font-bold'
         )}
       >
         <span className='tabular-nums'>{props.primary}</span>
-        <DiscountBadge percent={props.discount ?? null} />
+        <DiscountFoldBadge fold={props.fold ?? null} />
       </div>
       {props.secondary ? (
-        <div className='text-muted-foreground mt-0.5 text-[11px]'>
+        <div
+          className={cn(
+            'mt-0.5 text-[11px]',
+            props.accentSecondary
+              ? 'text-[var(--chuyi-orange,#ff6a00)]'
+              : 'text-muted-foreground'
+          )}
+        >
           {props.secondary}
         </div>
       ) : null}
@@ -124,7 +123,7 @@ function ContextTierHint(props: {
   return (
     <Tooltip>
       <TooltipTrigger
-        className='text-muted-foreground hover:text-foreground mt-1 inline-flex items-center gap-0.5 text-[11px] underline decoration-dashed underline-offset-2'
+        className='mt-1 inline-flex items-center gap-0.5 text-[11px] text-[var(--chuyi-orange,#ff6a00)] underline decoration-dashed underline-offset-2 hover:text-[var(--chuyi-ink,#141414)]'
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
       >
@@ -237,7 +236,7 @@ function SuccessHealthCell(props: { rate?: number; samples?: number[] }) {
               key={sample.key}
               aria-hidden
               className={cn(
-                'h-full w-[3px] rounded-sm',
+                'h-full w-[2px] rounded-[1px]',
                 getSuccessRateDotClass(sample.rate)
               )}
             />
@@ -260,7 +259,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
   const canToggle = props.models.length > TEAMO_TABLE_PREVIEW_COUNT
   const perfQuery = useQuery({
     queryKey: ['perf-metrics-summary', 24],
-    queryFn: () => getPerfMetricsSummary(24),
+    queryFn: fetchPublicPerfSummary,
     staleTime: 60 * 1000,
     retry: false,
     enabled: props.successRates == null,
@@ -296,23 +295,41 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
   return (
     <div className='space-y-4'>
       <TooltipProvider delay={100}>
-        <div className='overflow-x-auto'>
+        <div className='max-md:overflow-x-auto'>
           <table className='w-full min-w-[920px] border-collapse text-left text-sm'>
             <thead>
               <tr className='text-muted-foreground border-b border-dashed border-[var(--chuyi-line,#e6e0d6)] text-xs'>
-                <th className='px-3 py-3 font-medium'>{t('Model')}</th>
-                <th className='px-3 py-3 font-medium'>{t('Context')}</th>
-                <th className='px-3 py-3 font-medium'>{t('Input (list)')}</th>
-                <th className='px-3 py-3 font-medium'>{t('Output (list)')}</th>
-                <th className='bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                  {t('Model')}
+                </th>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                  {t('Context')}
+                </th>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                  {t('Input (list)')}
+                </th>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                  {t('Output (list)')}
+                </th>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
                   {t('Input (Chuyi)')}
+                  <span
+                    aria-hidden
+                    className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
+                  />
                 </th>
-                <th className='bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3 font-medium'>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3 font-medium'>
                   {t('Output (Chuyi)')}
+                  <span
+                    aria-hidden
+                    className='absolute inset-x-0 bottom-0 h-0.5 bg-[var(--chuyi-cyan,#c8e8ee)]'
+                  />
                 </th>
-                <th className='px-3 py-3 font-medium'>{t('Provider')}</th>
+                <th className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'>
+                  {t('Provider')}
+                </th>
                 <th
-                  className='px-3 py-3 font-medium'
+                  className='sticky top-[var(--chuyi-header-offset,4.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
                   title={t('24h request success rate')}
                 >
                   {t('Uptime (SLA)')}
@@ -321,10 +338,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
             </thead>
             <tbody>
               {visibleModels.map((model, index) => {
-                const discount = getSiteDiscountPercent(
-                  model,
-                  props.selectedGroup
-                )
+                const fold = getSiteDiscountFold(model, props.selectedGroup)
                 const listInput = stripTrailingZeros(
                   formatListPrice(
                     model,
@@ -441,13 +455,15 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                         primary={siteInput}
                         secondary={siteCache}
                         extra={tierHint}
-                        discount={discount}
+                        accentSecondary
+                        fold={fold}
                       />
                     </td>
-                    <td className='bg-[var(--chuyi-peach,#fff1e4)] px-3 py-3'>
+                    <td className='bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3'>
                       <PriceStack
                         primary={siteOutput}
-                        discount={discount}
+                        extra={tierHint}
+                        fold={fold}
                       />
                     </td>
                     <td className='px-3 py-3'>

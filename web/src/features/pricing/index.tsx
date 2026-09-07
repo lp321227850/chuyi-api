@@ -29,6 +29,7 @@ import {
   LoadingSkeleton,
   EmptyState,
   FeaturedModelCards,
+  PricingCtaBanner,
   SearchBar,
   PricingToolbar,
   ModelCardGrid,
@@ -39,10 +40,8 @@ import {
 import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
-import {
-  getMaxSiteDiscountPercent,
-  pickFeaturedModels,
-} from './lib/teamo-display'
+import { getMaxSiteDiscountFold } from './lib/price'
+import { pickFeaturedModels } from './lib/teamo-display'
 
 export function Pricing() {
   const { t } = useTranslation()
@@ -117,8 +116,8 @@ export function Pricing() {
     () => pickFeaturedModels(models || [], { selectedGroup: groupFilter }),
     [groupFilter, models]
   )
-  const maxDiscountPercent = useMemo(
-    () => getMaxSiteDiscountPercent(models || [], groupFilter),
+  const maxDiscountFold = useMemo(
+    () => getMaxSiteDiscountFold(models || [], groupFilter),
     [groupFilter, models]
   )
 
@@ -128,9 +127,9 @@ export function Pricing() {
   }, [clearFilters, clearSearch])
 
   let pricingTitle = t('Live pricing')
-  if (maxDiscountPercent != null) {
-    pricingTitle = t('Live pricing · up to {{percent}}% off', {
-      percent: maxDiscountPercent,
+  if (maxDiscountFold != null) {
+    pricingTitle = t('Live pricing · as low as {{fold}}×', {
+      fold: maxDiscountFold,
     })
   }
 
@@ -196,7 +195,7 @@ export function Pricing() {
               {pricingTitle}
             </h1>
             <p className='text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base'>
-              {t('All prices per 1 million tokens, in the site currency.')}
+              {t('All prices in USD per 1M tokens. Updated hourly.')}
             </p>
           </header>
 
@@ -220,7 +219,7 @@ export function Pricing() {
               value={searchInput}
               onChange={setSearchInput}
               onClear={clearSearch}
-              placeholder={t('Search models, e.g. Opus, GPT-')}
+              placeholder={t('Search models')}
               className='w-full lg:max-w-sm'
             />
           </div>
@@ -258,6 +257,7 @@ export function Pricing() {
             />
 
             {renderPricingContent()}
+            <PricingCtaBanner />
           </main>
 
           {selectedModel && (

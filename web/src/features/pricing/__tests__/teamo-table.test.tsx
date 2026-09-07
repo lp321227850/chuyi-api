@@ -81,6 +81,7 @@ describe('TeamoPricingTable', () => {
     expect(screen.getByText('Output (Chuyi)')).toBeVisible()
     expect(screen.getByText('Uptime (SLA)')).toBeVisible()
     expect(screen.getByText('model-1')).toBeVisible()
+    expect(screen.getAllByText('200K').length).toBeGreaterThan(0)
     expect(
       screen.queryByText(`model-${TEAMO_TABLE_PREVIEW_COUNT + 1}`)
     ).not.toBeInTheDocument()
@@ -159,11 +160,11 @@ describe('TeamoPricingTable', () => {
     ])
 
     expect(
-      screen.getByRole('button', { name: 'Context-tiered pricing' })
-    ).toBeVisible()
+      screen.getAllByRole('button', { name: 'Context-tiered pricing' }).length
+    ).toBeGreaterThan(0)
   })
 
-  it('shows a discount badge only when the group ratio is below list', () => {
+  it('shows a fold badge only when the group ratio is below list', () => {
     renderTable([
       model({
         model_name: 'full-price',
@@ -171,10 +172,12 @@ describe('TeamoPricingTable', () => {
         group_ratio: { default: 1 },
       }),
     ])
+    expect(screen.queryByText('1×')).not.toBeInTheDocument()
     expect(screen.queryByText('90% off')).not.toBeInTheDocument()
 
     cleanup()
     renderTable([model({ model_name: 'sale-price' })])
-    expect(screen.getAllByText('90% off').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
+    expect(screen.queryByText('90% off')).not.toBeInTheDocument()
   })
 })

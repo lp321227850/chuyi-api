@@ -24,6 +24,7 @@ import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import { FILTER_ALL } from '../constants'
+import { sortVendorsForPricingPills } from '../lib/teamo-display'
 import type { PricingVendor } from '../types'
 
 interface VendorFilterPillsProps {
@@ -36,7 +37,7 @@ export function VendorFilterPills(props: VendorFilterPillsProps) {
   const { t } = useTranslation()
   const pills = [
     { value: FILTER_ALL, label: t('Featured'), icon: null as ReactNode },
-    ...props.vendors.map((vendor) => ({
+    ...sortVendorsForPricingPills(props.vendors).map((vendor) => ({
       value: vendor.name,
       label: vendor.name,
       icon: vendor.icon ? getLobeIcon(vendor.icon, 14) : null,

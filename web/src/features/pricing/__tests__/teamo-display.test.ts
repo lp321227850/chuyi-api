@@ -18,7 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { describe, expect, it } from 'vitest'
 
-import { getSiteDiscountPercent } from '../lib/price'
+import {
+  formatDiscountFold,
+  getMaxSiteDiscountFold,
+  getSiteDiscountFold,
+  getSiteDiscountPercent,
+} from '../lib/price'
 import {
   formatContextLengthCondition,
   formatContextWindow,
@@ -27,6 +32,7 @@ import {
   getMaxSiteDiscountPercent,
   hasCachePrice,
   pickFeaturedModels,
+  sortVendorsForPricingPills,
 } from '../lib/teamo-display'
 import type { PricingModel } from '../types'
 
@@ -80,6 +86,71 @@ describe('hasCachePrice', () => {
     expect(hasCachePrice(model({ quota_type: 1, cache_ratio: 0.1 }))).toBe(
       false
     )
+  })
+})
+
+describe('formatDiscountFold', () => {
+  it('converts a real group ratio into a Chinese fold number', () => {
+    expect(formatDiscountFold(0.08)).toBe('0.8')
+    expect(formatDiscountFold(0.11)).toBe('1.1')
+    expect(formatDiscountFold(0.1)).toBe('1')
+    expect(formatDiscountFold(0.59)).toBe('5.9')
+    expect(formatDiscountFold(1)).toBeNull()
+    expect(formatDiscountFold(0)).toBeNull()
+  })
+})
+
+describe('getSiteDiscountFold', () => {
+  it('returns a fold only when the displayed group ratio is below list', () => {
+    expect(getSiteDiscountFold(model())).toBeNull()
+    expect(
+      getSiteDiscountFold(
+        model({
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.08 },
+        })
+      )
+    ).toBe('0.8')
+  })
+})
+
+describe('getMaxSiteDiscountFold', () => {
+  it('returns the lowest real fold across models', () => {
+    expect(getMaxSiteDiscountFold([model()])).toBeNull()
+    expect(
+      getMaxSiteDiscountFold([
+        model({
+          id: 1,
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.5 },
+        }),
+        model({
+          id: 2,
+          model_name: 'cheaper',
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.08 },
+        }),
+      ])
+    ).toBe('0.8')
+  })
+})
+
+describe('sortVendorsForPricingPills', () => {
+  it('places Teamo-order vendors first and keeps unknown names after them', () => {
+    const sorted = sortVendorsForPricingPills([
+      { id: 9, name: 'Other' },
+      { id: 4, name: 'DeepSeek' },
+      { id: 1, name: 'OpenAI' },
+      { id: 7, name: 'Grok' },
+      { id: 2, name: 'Anthropic' },
+    ])
+    expect(sorted.map((vendor) => vendor.name)).toEqual([
+      'OpenAI',
+      'Anthropic',
+      'DeepSeek',
+      'Grok',
+      'Other',
+    ])
   })
 })
 

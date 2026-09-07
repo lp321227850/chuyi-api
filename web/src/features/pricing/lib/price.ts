@@ -282,6 +282,41 @@ export function getSiteDiscountPercent(
   return Math.max(1, Math.round((1 - ratio) * 100))
 }
 
+/**
+ * Chinese fold (折) of a group ratio: 0.08 → "0.8", 0.11 → "1.1", 0.1 → "1".
+ * Returns null when the ratio is not a real discount versus list (1).
+ */
+export function formatDiscountFold(ratio: number): string | null {
+  if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
+    return null
+  }
+  const fold = Math.round(ratio * 10 * 10) / 10
+  if (fold <= 0) return null
+  return Number.isInteger(fold) ? String(fold) : fold.toFixed(1)
+}
+
+export function getSiteDiscountFold(
+  model: PricingModel,
+  selectedGroup?: string
+): string | null {
+  return formatDiscountFold(getDisplayGroupRatio(model, selectedGroup))
+}
+
+export function getMaxSiteDiscountFold(
+  models: PricingModel[],
+  selectedGroup?: string
+): string | null {
+  let minRatio: number | null = null
+  for (const model of models) {
+    const ratio = getDisplayGroupRatio(model, selectedGroup)
+    if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) continue
+    if (minRatio == null || ratio < minRatio) {
+      minRatio = ratio
+    }
+  }
+  return minRatio == null ? null : formatDiscountFold(minRatio)
+}
+
 export function formatListPrice(
   model: PricingModel,
   type: PriceType,

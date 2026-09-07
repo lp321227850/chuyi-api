@@ -63,6 +63,7 @@ describe('FeaturedModelCards', () => {
     expect(screen.getByText('$0.2')).toBeVisible()
     expect(screen.getByText('$4')).toBeVisible()
     expect(screen.getByText('$0.4')).toBeVisible()
+    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
 
     await user.click(screen.getByRole('button', { name: /gpt-featured/ }))
     expect(onModelClick).toHaveBeenCalledWith('gpt-featured')

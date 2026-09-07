@@ -22,8 +22,14 @@ import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import { DEFAULT_TOKEN_UNIT } from '../constants'
-import { formatListPrice, formatPrice, stripTrailingZeros } from '../lib/price'
+import {
+  formatListPrice,
+  formatPrice,
+  getSiteDiscountFold,
+  stripTrailingZeros,
+} from '../lib/price'
 import type { PricingModel, TokenUnit } from '../types'
+import { DiscountFoldBadge } from './discount-fold-badge'
 
 export interface FeaturedModelCardsProps {
   models: PricingModel[]
@@ -92,6 +98,7 @@ export function FeaturedModelCards(props: FeaturedModelCardsProps) {
             props.selectedGroup
           )
         )
+        const fold = getSiteDiscountFold(model, props.selectedGroup)
 
         return (
           <button
@@ -124,11 +131,13 @@ export function FeaturedModelCards(props: FeaturedModelCardsProps) {
                 label={t('Input / {{unit}} tokens', { unit: unitLabel })}
                 listPrice={listInput}
                 sitePrice={siteInput}
+                fold={fold}
               />
               <FeaturedPricePair
                 label={t('Output / {{unit}} tokens', { unit: unitLabel })}
                 listPrice={listOutput}
                 sitePrice={siteOutput}
+                fold={fold}
               />
             </div>
           </button>
@@ -142,17 +151,19 @@ function FeaturedPricePair(props: {
   label: string
   listPrice: string
   sitePrice: string
+  fold: string | null
 }) {
   return (
     <div>
       <div className='text-muted-foreground mb-1 text-[11px]'>{props.label}</div>
-      <div className='flex flex-wrap items-baseline gap-x-2 gap-y-0.5'>
+      <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5'>
         {props.listPrice !== '-' ? (
           <span className='text-muted-foreground text-sm tabular-nums'>
             {props.listPrice}
           </span>
         ) : null}
         <span className='text-lg font-bold tabular-nums'>{props.sitePrice}</span>
+        <DiscountFoldBadge fold={props.fold} className='ml-0' />
       </div>
     </div>
   )

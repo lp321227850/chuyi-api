@@ -16,20 +16,26 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { PricingSidebar } from './pricing-sidebar'
-export { PricingToolbar } from './pricing-toolbar'
-export { ModelCard } from './model-card'
-export { ModelCardGrid } from './model-card-grid'
-export { LoadingSkeleton } from './loading-skeleton'
-export { EmptyState } from './empty-state'
-export { SearchBar } from './search-bar'
-export {
-  ModelDetails,
-  ModelDetailsContent,
-  ModelDetailsDrawer,
-} from './model-details'
-export { PricingTable } from './pricing-table'
-export { TeamoPricingTable } from './teamo-pricing-table'
-export { FeaturedModelCards } from './featured-model-cards'
-export { PricingCtaBanner } from './pricing-cta-banner'
-export { VendorFilterPills } from './vendor-filter-pills'
+import { useTranslation } from 'react-i18next'
+
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+
+export function DiscountFoldBadge(props: {
+  fold: string | null
+  className?: string
+}) {
+  const { t } = useTranslation()
+  if (props.fold == null) return null
+  return (
+    <Badge
+      variant='default'
+      className={cn(
+        'ml-1.5 h-auto rounded-[3px] border-transparent bg-[var(--chuyi-ink,#141414)] px-1.5 py-0.5 text-[10px] font-semibold text-white',
+        props.className
+      )}
+    >
+      {t('{{fold}}×', { fold: props.fold })}
+    </Badge>
+  )
+}

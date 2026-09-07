@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { PricingModel } from '../types'
+import type { PricingModel, PricingVendor } from '../types'
 import {
   parseTiersFromExpr,
   type ParsedTier,
@@ -66,6 +66,35 @@ export function getMaxSiteDiscountPercent(
     }
   }
   return maxPercent
+}
+
+const TEAMO_VENDOR_RANK: Record<string, number> = {
+  openai: 0,
+  anthropic: 1,
+  google: 2,
+  kimi: 3,
+  moonshot: 3,
+  deepseek: 4,
+  glm: 5,
+  zhipu: 5,
+  zhipuai: 5,
+  'zhipu ai': 5,
+  grok: 6,
+  xai: 6,
+  'x.ai': 6,
+}
+
+export function sortVendorsForPricingPills(
+  vendors: PricingVendor[]
+): PricingVendor[] {
+  return [...vendors].sort((left, right) => {
+    const leftRank =
+      TEAMO_VENDOR_RANK[left.name.trim().toLowerCase()] ?? 100
+    const rightRank =
+      TEAMO_VENDOR_RANK[right.name.trim().toLowerCase()] ?? 100
+    if (leftRank !== rightRank) return leftRank - rightRank
+    return left.name.localeCompare(right.name)
+  })
 }
 
 export function pickFeaturedModels(
