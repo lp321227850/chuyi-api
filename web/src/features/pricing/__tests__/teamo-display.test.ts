@@ -19,7 +19,15 @@ For commercial licensing, please contact support@quantumnous.com
 import { describe, expect, it } from 'vitest'
 
 import { getSiteDiscountPercent } from '../lib/price'
-import { formatContextWindow } from '../lib/teamo-display'
+import {
+  formatContextLengthCondition,
+  formatContextWindow,
+  getComplementContextLengthLabel,
+  getContextLengthTiers,
+  getMaxSiteDiscountPercent,
+  hasCachePrice,
+  pickFeaturedModels,
+} from '../lib/teamo-display'
 import type { PricingModel } from '../types'
 
 function model(overrides: Partial<PricingModel> = {}): PricingModel {
@@ -62,5 +70,149 @@ describe('getSiteDiscountPercent', () => {
         })
       )
     ).toBe(90)
+  })
+})
+
+describe('hasCachePrice', () => {
+  it('is true only for token models with a finite cache ratio', () => {
+    expect(hasCachePrice(model({ cache_ratio: 0.1 }))).toBe(true)
+    expect(hasCachePrice(model({ cache_ratio: null }))).toBe(false)
+    expect(hasCachePrice(model({ quota_type: 1, cache_ratio: 0.1 }))).toBe(
+      false
+    )
+  })
+})
+
+describe('getMaxSiteDiscountPercent', () => {
+  it('returns null when every model is full price', () => {
+    expect(getMaxSiteDiscountPercent([model()])).toBeNull()
+  })
+
+  it('returns the largest real group discount', () => {
+    expect(
+      getMaxSiteDiscountPercent([
+        model({
+          id: 1,
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.5 },
+        }),
+        model({
+          id: 2,
+          model_name: 'cheaper',
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.1 },
+        }),
+      ])
+    ).toBe(90)
+  })
+})
+
+describe('pickFeaturedModels', () => {
+  it('skips request-priced models and prefers discounted vendors first', () => {
+    const openaiCheap = model({
+      id: 1,
+      model_name: 'gpt-cheap',
+      vendor_name: 'OpenAI',
+      enable_groups: ['vip'],
+      group_ratio: { vip: 0.1 },
+    })
+    const openaiFull = model({
+      id: 2,
+      model_name: 'gpt-full',
+      vendor_name: 'OpenAI',
+      enable_groups: ['default'],
+      group_ratio: { default: 1 },
+    })
+    const anthropicCheap = model({
+      id: 3,
+      model_name: 'claude-cheap',
+      vendor_name: 'Anthropic',
+      enable_groups: ['vip'],
+      group_ratio: { vip: 0.2 },
+    })
+    const perRequest = model({
+      id: 4,
+      model_name: 'image-1',
+      vendor_name: 'OpenAI',
+      quota_type: 1,
+      enable_groups: ['vip'],
+      group_ratio: { vip: 0.1 },
+    })
+
+    const picked = pickFeaturedModels(
+      [openaiFull, perRequest, openaiCheap, anthropicCheap],
+      { limit: 3 }
+    )
+    expect(picked.map((item) => item.model_name)).toEqual([
+      'gpt-cheap',
+      'claude-cheap',
+      'gpt-full',
+    ])
+  })
+
+  it('fills remaining slots with other token models when discounts are scarce', () => {
+    const picked = pickFeaturedModels(
+      [
+        model({
+          id: 1,
+          model_name: 'only-deal',
+          vendor_name: 'OpenAI',
+          enable_groups: ['vip'],
+          group_ratio: { vip: 0.1 },
+        }),
+        model({
+          id: 2,
+          model_name: 'full-a',
+          vendor_name: 'Anthropic',
+        }),
+        model({
+          id: 3,
+          model_name: 'full-b',
+          vendor_name: 'Google',
+        }),
+      ],
+      { limit: 3 }
+    )
+    expect(picked.map((item) => item.model_name)).toEqual([
+      'only-deal',
+      'full-a',
+      'full-b',
+    ])
+  })
+})
+
+describe('getContextLengthTiers', () => {
+  const lengthExpr =
+    'len <= 272000 ? tier("short", p * 1.92 + c * 7.2) : tier("long", p * 3.84 + c * 10.8)'
+
+  it('returns parsed length tiers only when the model has a real len expression', () => {
+    const tiers = getContextLengthTiers(
+      model({
+        billing_mode: 'tiered_expr',
+        billing_expr: lengthExpr,
+      })
+    )
+    expect(tiers).toHaveLength(2)
+    expect(
+      formatContextLengthCondition(tiers[0].conditions, tiers[0].label)
+    ).toBe('≤ 272K')
+    expect(
+      formatContextLengthCondition(
+        tiers[1].conditions,
+        getComplementContextLengthLabel(tiers) || tiers[1].label
+      )
+    ).toBe('> 272K')
+  })
+
+  it('omits a tooltip source when billing is not length-tiered', () => {
+    expect(
+      getContextLengthTiers(
+        model({
+          billing_mode: 'tiered_expr',
+          billing_expr: 'tier("base", p * 2 + c * 8)',
+        })
+      )
+    ).toEqual([])
+    expect(getContextLengthTiers(model())).toEqual([])
   })
 })

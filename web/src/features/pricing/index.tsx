@@ -28,6 +28,7 @@ import { PageTransition } from '@/components/page-transition'
 import {
   LoadingSkeleton,
   EmptyState,
+  FeaturedModelCards,
   SearchBar,
   PricingToolbar,
   ModelCardGrid,
@@ -38,6 +39,10 @@ import {
 import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
+import {
+  getMaxSiteDiscountPercent,
+  pickFeaturedModels,
+} from './lib/teamo-display'
 
 export function Pricing() {
   const { t } = useTranslation()
@@ -108,10 +113,26 @@ export function Pricing() {
     [usableGroup]
   )
 
+  const featuredModels = useMemo(
+    () => pickFeaturedModels(models || [], { selectedGroup: groupFilter }),
+    [groupFilter, models]
+  )
+  const maxDiscountPercent = useMemo(
+    () => getMaxSiteDiscountPercent(models || [], groupFilter),
+    [groupFilter, models]
+  )
+
   const handleClearAll = useCallback(() => {
     clearFilters()
     clearSearch()
   }, [clearFilters, clearSearch])
+
+  let pricingTitle = t('Live pricing')
+  if (maxDiscountPercent != null) {
+    pricingTitle = t('Live pricing · up to {{percent}}% off', {
+      percent: maxDiscountPercent,
+    })
+  }
 
   const renderPricingContent = () => {
     if (filteredModels.length === 0) {
@@ -170,16 +191,24 @@ export function Pricing() {
           className='chuyi-mesh pointer-events-none absolute inset-x-0 top-0 h-[28rem] opacity-70'
         />
         <PageTransition className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
-          <header className='chuyi-enter mb-8 pt-4 sm:mb-10'>
+          <header id='pricing' className='chuyi-enter mb-8 pt-4 sm:mb-10'>
             <h1 className='text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'>
-              {t('Model Pricing')}
+              {pricingTitle}
             </h1>
             <p className='text-muted-foreground mt-3 max-w-2xl text-sm sm:text-base'>
-              {t(
-                'Transparent per-million-token prices in USD. Compare list rates with Chuyi rates.'
-              )}
+              {t('All prices per 1 million tokens, in the site currency.')}
             </p>
           </header>
+
+          <FeaturedModelCards
+            models={featuredModels}
+            priceRate={priceRate}
+            usdExchangeRate={usdExchangeRate}
+            tokenUnit={tokenUnit}
+            showRechargePrice={showRechargePrice}
+            selectedGroup={groupFilter}
+            onModelClick={handleModelClick}
+          />
 
           <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
             <VendorFilterPills

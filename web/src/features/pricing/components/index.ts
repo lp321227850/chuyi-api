@@ -30,4 +30,5 @@ export {
 } from './model-details'
 export { PricingTable } from './pricing-table'
 export { TeamoPricingTable } from './teamo-pricing-table'
+export { FeaturedModelCards } from './featured-model-cards'
 export { VendorFilterPills } from './vendor-filter-pills'
