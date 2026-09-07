@@ -319,7 +319,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
       <TooltipProvider delay={100}>
         <div
           data-chuyi-pricing-table=''
-          className='max-lg:overflow-x-auto max-lg:overflow-y-hidden'
+          className='w-full max-w-full min-w-0 max-lg:overflow-x-auto max-lg:overflow-y-hidden max-lg:[contain:inline-size]'
         >
           <table className='w-full min-w-[920px] border-collapse text-left text-sm'>
             <thead>

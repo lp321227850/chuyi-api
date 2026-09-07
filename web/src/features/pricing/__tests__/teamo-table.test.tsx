@@ -162,6 +162,8 @@ describe('TeamoPricingTable', () => {
     const wrapper = container.querySelector('[data-chuyi-pricing-table]')
     expect(wrapper).not.toBeNull()
     expect(wrapper?.className).toMatch(/max-lg:overflow-x-auto/)
+    expect(wrapper?.className).toMatch(/max-w-full/)
+    expect(wrapper?.className).toMatch(/min-w-0/)
     expect(wrapper?.className).not.toMatch(/(^|\s)overflow-x-auto/)
     const headerCell = screen.getByText('Model').closest('th')
     expect(headerCell).not.toBeNull()

@@ -39,6 +39,8 @@ describe('PublicLayout', () => {
     const root = container.querySelector('[data-chuyi-theme]')
     expect(root).not.toBeNull()
     expect(root?.className).toMatch(/max-lg:overflow-x-clip/)
+    expect(root?.className).toMatch(/max-w-full/)
+    expect(root?.className).toMatch(/min-w-0/)
     expect(root?.className).not.toMatch(/(^|\s)overflow-x-clip/)
     expect(root?.className).not.toMatch(/overflow-hidden/)
   })

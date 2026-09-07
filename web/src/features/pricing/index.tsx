@@ -191,11 +191,11 @@ export function Pricing() {
 
   return (
     <PublicLayout showMainContainer={false}>
-      <div className='relative max-lg:overflow-x-clip'>
+      <div className='relative max-w-full min-w-0 max-lg:overflow-x-clip'>
         <div className='pointer-events-none absolute inset-x-0 top-0 h-[28rem] overflow-hidden'>
           <div aria-hidden className='chuyi-mesh h-full w-full opacity-70' />
         </div>
-        <div className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
+        <div className='relative mx-auto w-full max-w-6xl min-w-0 px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
           <header id='pricing' className='chuyi-enter mb-8 pt-4 sm:mb-10'>
             <h1 className='text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'>
               {pricingTitle}
@@ -232,7 +232,7 @@ export function Pricing() {
             />
           </div>
 
-          <main className='min-w-0 space-y-4'>
+          <main className='min-w-0 max-w-full space-y-4'>
             <PricingToolbar
               filteredCount={filteredModels.length}
               totalCount={models?.length}

@@ -314,3 +314,15 @@ For commercial licensing, please contact support@quantumnous.com
     transition: none !important;
   }
 }
+
+/* Clip document overflow below lg. overflow-x: clip on html/body keeps
+ * scrollWidth from growing past clientWidth (classic 100vw / scrollbar
+ * gutter miss). Do not apply at lg+ — that would break sticky thead. */
+@media (width < 64rem) {
+  html:has([data-chuyi-theme]),
+  html:has([data-chuyi-theme]) body,
+  html:has([data-chuyi-theme]) #root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+}

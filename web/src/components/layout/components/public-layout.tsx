@@ -47,7 +47,7 @@ export function PublicLayout(props: PublicLayoutProps) {
     <div
       data-chuyi-theme=''
       data-chuyi-announce={announceOn ? 'on' : 'off'}
-      className='bg-background text-foreground relative min-h-svh max-lg:overflow-x-clip'
+      className='bg-background text-foreground relative min-h-svh max-w-full min-w-0 max-lg:overflow-x-clip'
     >
       <PublicHeader
         appearance='marketing'

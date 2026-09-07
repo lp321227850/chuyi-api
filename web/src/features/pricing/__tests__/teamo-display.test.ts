@@ -18,6 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { describe, expect, it } from 'vitest'
 
+import en from '@/i18n/locales/en.json'
+
 import { getDisplayGroupRatio } from '../lib/model-helpers'
 import {
   formatDiscountFold,
@@ -165,6 +167,18 @@ describe('formatDiscountPercent', () => {
     expect(formatDiscountPercent(0.08)).toBe(92)
     expect(formatDiscountPercent(1)).toBeNull()
     expect(formatDiscountPercent(0)).toBeNull()
+  })
+})
+
+describe('dead EN fold-times locale keys', () => {
+  it('are removed so titles and badges cannot resolve to 1×', () => {
+    const keys = Object.keys(en.translation)
+    expect(keys).not.toContain('{{fold}}×')
+    expect(keys).not.toContain('Live pricing · as low as {{fold}}×')
+    expect(en.translation['{{percent}}% off']).toBe('{{percent}}% off')
+    expect(en.translation['Live pricing · up to {{percent}}% off']).toBe(
+      'Live pricing · up to {{percent}}% off'
+    )
   })
 })
 
