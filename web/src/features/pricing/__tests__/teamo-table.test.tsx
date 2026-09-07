@@ -102,6 +102,7 @@ describe('TeamoPricingTable', () => {
     expect(screen.getByText('—')).toBeVisible()
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
     expect(screen.queryByText('99.98%')).not.toBeInTheDocument()
+    expect(document.querySelector('[class*="bg-muted"]')).toBeNull()
     if (fakeUptime != null) {
       expect(
         screen.queryByText(`${fakeUptime.toFixed(2)}%`)
@@ -118,7 +119,11 @@ describe('TeamoPricingTable', () => {
       name: 'Recent success-rate samples',
     })
     expect(sparkline.querySelectorAll('[aria-hidden]')).toHaveLength(1)
-    expect(sparkline.className).toMatch(/h-6/)
+    expect(sparkline.className).toMatch(/h-8/)
+    expect(sparkline.querySelector('[aria-hidden]')?.className).toMatch(
+      /bg-emerald-600|bg-amber-500|bg-red-600/
+    )
+    expect(sparkline.className).not.toMatch(/bg-muted/)
   })
 
   it('draws one health segment per real recent success sample', () => {
@@ -129,7 +134,12 @@ describe('TeamoPricingTable', () => {
     })
     expect(sparkline).toBeVisible()
     expect(sparkline.querySelectorAll('[aria-hidden]')).toHaveLength(3)
-    expect(sparkline.className).toMatch(/h-6/)
+    expect(sparkline.className).toMatch(/h-8/)
+    const segments = sparkline.querySelectorAll('[aria-hidden]')
+    for (const segment of segments) {
+      expect(segment.className).toMatch(/w-2\.5|w-3/)
+      expect(segment.className).not.toMatch(/bg-muted/)
+    }
   })
 
   it('matches SLA rows when the summary uses a vendor-prefixed model name', () => {

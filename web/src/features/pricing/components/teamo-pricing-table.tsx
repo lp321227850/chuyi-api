@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/tooltip'
 import {
   formatUptimePct,
-  getSuccessRateDotClass,
+  getSuccessRateLevel,
 } from '@/features/performance-metrics/lib/format'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
@@ -204,6 +204,21 @@ function ContextTierHint(props: {
   )
 }
 
+function slaBarHeightClass(rate: number): string {
+  if (rate >= 99) return 'h-8'
+  if (rate >= 95) return 'h-7'
+  if (rate >= 90) return 'h-6'
+  if (rate >= 70) return 'h-5'
+  return 'h-4'
+}
+
+function slaBarToneClass(rate: number): string {
+  const level = getSuccessRateLevel(rate)
+  if (level === 'warning') return 'bg-amber-500'
+  if (level === 'critical') return 'bg-red-600'
+  return 'bg-emerald-600'
+}
+
 function SuccessHealthCell(props: { rate?: number; samples?: number[] }) {
   const { t } = useTranslation()
   const rate = props.rate
@@ -235,15 +250,16 @@ function SuccessHealthCell(props: { rate?: number; samples?: number[] }) {
         <div
           role='img'
           aria-label={t('Recent success-rate samples')}
-          className='mt-1.5 flex h-6 items-end gap-0.5'
+          className='mt-1.5 flex h-8 items-end gap-1'
         >
           {labeledSamples.map((sample) => (
             <span
               key={sample.key}
               aria-hidden
               className={cn(
-                'h-full w-2 rounded-[2px]',
-                getSuccessRateDotClass(sample.rate)
+                'w-2.5 rounded-sm',
+                slaBarHeightClass(sample.rate),
+                slaBarToneClass(sample.rate)
               )}
             />
           ))}
