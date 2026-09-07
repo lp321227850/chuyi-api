@@ -25,7 +25,7 @@ import { DEFAULT_TOKEN_UNIT } from '../constants'
 import {
   formatListPrice,
   formatPrice,
-  getSiteDiscountFold,
+  getSiteDiscountRatio,
   stripTrailingZeros,
 } from '../lib/price'
 import type { PricingModel, TokenUnit } from '../types'
@@ -104,7 +104,10 @@ export function FeaturedModelCards(props: FeaturedModelCardsProps) {
             props.selectedGroup
           )
         )
-        const fold = getSiteDiscountFold(model, props.selectedGroup)
+        const discountRatio = getSiteDiscountRatio(
+          model,
+          props.selectedGroup
+        )
 
         return (
           <button
@@ -137,13 +140,13 @@ export function FeaturedModelCards(props: FeaturedModelCardsProps) {
                 label={t('Input / {{unit}} tokens', { unit: unitLabel })}
                 listPrice={listInput}
                 sitePrice={siteInput}
-                fold={fold}
+                ratio={discountRatio}
               />
               <FeaturedPricePair
                 label={t('Output / {{unit}} tokens', { unit: unitLabel })}
                 listPrice={listOutput}
                 sitePrice={siteOutput}
-                fold={fold}
+                ratio={discountRatio}
               />
             </div>
           </button>
@@ -157,7 +160,7 @@ function FeaturedPricePair(props: {
   label: string
   listPrice: string
   sitePrice: string
-  fold: string | null
+  ratio?: number | null
 }) {
   return (
     <div>
@@ -169,7 +172,7 @@ function FeaturedPricePair(props: {
           </span>
         ) : null}
         <span className='text-lg font-bold tabular-nums'>{props.sitePrice}</span>
-        <DiscountFoldBadge fold={props.fold} className='ml-0' />
+        <DiscountFoldBadge ratio={props.ratio} className='ml-0' />
       </div>
     </div>
   )

@@ -40,7 +40,10 @@ import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
 import { getMaxSiteDiscountFold } from './lib/price'
-import { pickFeaturedModels } from './lib/teamo-display'
+import {
+  getMaxSiteDiscountPercent,
+  pickFeaturedModels,
+} from './lib/teamo-display'
 
 export function Pricing() {
   const { t } = useTranslation()
@@ -119,6 +122,10 @@ export function Pricing() {
     () => getMaxSiteDiscountFold(models || [], groupFilter),
     [groupFilter, models]
   )
+  const maxDiscountPercent = useMemo(
+    () => getMaxSiteDiscountPercent(models || [], groupFilter),
+    [groupFilter, models]
+  )
 
   const handleClearAll = useCallback(() => {
     clearFilters()
@@ -126,8 +133,9 @@ export function Pricing() {
   }, [clearFilters, clearSearch])
 
   let pricingTitle = t('Live pricing')
-  if (maxDiscountFold != null) {
-    pricingTitle = t('Live pricing · as low as {{fold}}×', {
+  if (maxDiscountFold != null && maxDiscountPercent != null) {
+    pricingTitle = t('Live pricing · up to {{percent}}% off', {
+      percent: maxDiscountPercent,
       fold: maxDiscountFold,
     })
   }
@@ -183,11 +191,10 @@ export function Pricing() {
 
   return (
     <PublicLayout showMainContainer={false}>
-      <div className='relative'>
-        <div
-          aria-hidden
-          className='chuyi-mesh pointer-events-none absolute inset-x-0 top-0 h-[28rem] opacity-70'
-        />
+      <div className='relative max-lg:overflow-x-clip'>
+        <div className='pointer-events-none absolute inset-x-0 top-0 h-[28rem] overflow-hidden'>
+          <div aria-hidden className='chuyi-mesh h-full w-full opacity-70' />
+        </div>
         <div className='relative mx-auto w-full max-w-6xl px-3 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-10'>
           <header id='pricing' className='chuyi-enter mb-8 pt-4 sm:mb-10'>
             <h1 className='text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] font-bold tracking-tight'>

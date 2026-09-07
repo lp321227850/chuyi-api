@@ -21,12 +21,20 @@ import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
+import {
+  formatDiscountFold,
+  formatDiscountPercent,
+} from '../lib/price'
+
 export function DiscountFoldBadge(props: {
-  fold: string | null
+  ratio?: number | null
   className?: string
 }) {
   const { t } = useTranslation()
-  if (props.fold == null) return null
+  if (props.ratio == null) return null
+  const fold = formatDiscountFold(props.ratio)
+  const percent = formatDiscountPercent(props.ratio)
+  if (fold == null || percent == null) return null
   return (
     <Badge
       variant='default'
@@ -35,7 +43,7 @@ export function DiscountFoldBadge(props: {
         props.className
       )}
     >
-      {t('{{fold}}×', { fold: props.fold })}
+      {t('{{percent}}% off', { percent, fold })}
     </Badge>
   )
 }

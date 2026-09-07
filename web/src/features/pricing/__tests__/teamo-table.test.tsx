@@ -202,6 +202,7 @@ describe('TeamoPricingTable', () => {
     )
     expect(screen.queryByText('1×')).not.toBeInTheDocument()
     expect(screen.queryByText('90% off')).not.toBeInTheDocument()
+    expect(screen.queryByText('1折')).not.toBeInTheDocument()
   })
 
   it('uses list cache for the list column and site cache for Chuyi', () => {
@@ -254,7 +255,7 @@ describe('TeamoPricingTable', () => {
 
     cleanup()
     renderTable([model({ model_name: 'sale-price' })])
-    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
-    expect(screen.queryByText('90% off')).not.toBeInTheDocument()
+    expect(screen.getAllByText('90% off').length).toBeGreaterThan(0)
+    expect(screen.queryByText('1×')).not.toBeInTheDocument()
   })
 })

@@ -21,6 +21,7 @@ import { describe, expect, it } from 'vitest'
 import { getDisplayGroupRatio } from '../lib/model-helpers'
 import {
   formatDiscountFold,
+  formatDiscountPercent,
   formatListPrice,
   formatPrice,
   getMaxSiteDiscountFold,
@@ -155,6 +156,15 @@ describe('formatDiscountFold', () => {
     expect(formatDiscountFold(0.59)).toBe('5.9')
     expect(formatDiscountFold(1)).toBeNull()
     expect(formatDiscountFold(0)).toBeNull()
+  })
+})
+
+describe('formatDiscountPercent', () => {
+  it('converts a real ratio into a percent-off number', () => {
+    expect(formatDiscountPercent(0.1)).toBe(90)
+    expect(formatDiscountPercent(0.08)).toBe(92)
+    expect(formatDiscountPercent(1)).toBeNull()
+    expect(formatDiscountPercent(0)).toBeNull()
   })
 })
 

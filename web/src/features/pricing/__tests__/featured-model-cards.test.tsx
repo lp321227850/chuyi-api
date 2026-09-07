@@ -48,6 +48,7 @@ describe('FeaturedModelCards', () => {
     expect(screen.getByText('No stats yet')).toBeVisible()
     expect(screen.queryByText('99.98%')).not.toBeInTheDocument()
     expect(screen.queryByText('1×')).not.toBeInTheDocument()
+    expect(screen.queryByText('90% off')).not.toBeInTheDocument()
   })
 
   it('compares list and site input/output prices and opens the model on click', async () => {
@@ -65,7 +66,8 @@ describe('FeaturedModelCards', () => {
     expect(screen.getByText('$0.2')).toBeVisible()
     expect(screen.getByText('$4')).toBeVisible()
     expect(screen.getByText('$0.4')).toBeVisible()
-    expect(screen.getAllByText('1×').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('90% off').length).toBeGreaterThan(0)
+    expect(screen.queryByText('1×')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /gpt-featured/ }))
     expect(onModelClick).toHaveBeenCalledWith('gpt-featured')

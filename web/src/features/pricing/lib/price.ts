@@ -319,15 +319,18 @@ export function getSiteDiscountRatio(
   )
 }
 
-export function getSiteDiscountPercent(
-  model: PricingModel,
-  selectedGroup?: string
-): number | null {
-  const ratio = getSiteDiscountRatio(model, selectedGroup)
+export function formatDiscountPercent(ratio: number): number | null {
   if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
     return null
   }
   return Math.max(1, Math.round((1 - ratio) * 100))
+}
+
+export function getSiteDiscountPercent(
+  model: PricingModel,
+  selectedGroup?: string
+): number | null {
+  return formatDiscountPercent(getSiteDiscountRatio(model, selectedGroup))
 }
 
 /**

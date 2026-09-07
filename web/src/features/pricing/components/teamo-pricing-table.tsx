@@ -42,7 +42,7 @@ import { getDisplayGroupRatio } from '../lib/model-helpers'
 import {
   formatListPrice,
   formatPrice,
-  getSiteDiscountFold,
+  getSiteDiscountRatio,
   stripTrailingZeros,
 } from '../lib/price'
 import {
@@ -76,7 +76,7 @@ function PriceStack(props: {
   extra?: ReactNode
   muted?: boolean
   accentSecondary?: boolean
-  fold?: string | null
+  ratio?: number | null
 }) {
   return (
     <div>
@@ -87,7 +87,7 @@ function PriceStack(props: {
         )}
       >
         <span className='tabular-nums'>{props.primary}</span>
-        <DiscountFoldBadge fold={props.fold ?? null} />
+        <DiscountFoldBadge ratio={props.ratio} />
       </div>
       {props.secondary ? (
         <div
@@ -319,7 +319,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
       <TooltipProvider delay={100}>
         <div
           data-chuyi-pricing-table=''
-          className='max-lg:-mx-3 max-lg:overflow-x-auto max-lg:overflow-y-hidden max-lg:px-3'
+          className='max-lg:overflow-x-auto max-lg:overflow-y-hidden'
         >
           <table className='w-full min-w-[920px] border-collapse text-left text-sm'>
             <thead>
@@ -363,7 +363,10 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
             </thead>
             <tbody>
               {visibleModels.map((model, index) => {
-                const fold = getSiteDiscountFold(model, props.selectedGroup)
+                const discountRatio = getSiteDiscountRatio(
+                  model,
+                  props.selectedGroup
+                )
                 const listInput = stripTrailingZeros(
                   formatListPrice(
                     model,
@@ -483,14 +486,14 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                         secondary={siteCache}
                         extra={tierHint}
                         accentSecondary
-                        fold={fold}
+                        ratio={discountRatio}
                       />
                     </td>
                     <td className='bg-[var(--chuyi-lavender,#eef1ff)] px-3 py-3'>
                       <PriceStack
                         primary={siteOutput}
                         extra={tierHint}
-                        fold={fold}
+                        ratio={discountRatio}
                       />
                     </td>
                     <td className='max-sm:hidden px-3 py-3 sm:table-cell'>
