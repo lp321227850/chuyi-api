@@ -16,15 +16,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   createMemoryHistory,
   createRootRoute,
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { api } from '@/lib/api'
 
 import {
   AnnouncementBar,
@@ -76,10 +79,70 @@ describe('resolveMarketingSiteName', () => {
 })
 
 describe('StatsStrip', () => {
-  it('renders the default marketing metrics', () => {
-    render(<StatsStrip />)
-    expect(screen.getByText('Tokens routed yesterday')).toBeVisible()
-    expect(screen.getByText('30-day availability')).toBeVisible()
+  let queryClient: QueryClient
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    })
+  })
+
+  afterEach(() => {
+    queryClient.clear()
+    vi.restoreAllMocks()
+  })
+
+  it('renders provided live metrics without vanity placeholders', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <StatsStrip
+          items={[
+            { value: '99.22%', label: '24h request success rate' },
+            { value: '1280', label: 'Requests in the last 24 hours' },
+          ]}
+        />
+      </QueryClientProvider>
+    )
+    expect(screen.getByText('99.22%')).toBeVisible()
+    expect(screen.getByText('24h request success rate')).toBeVisible()
+    expect(screen.getByText('1280')).toBeVisible()
+    expect(screen.queryByText('796B+')).not.toBeInTheDocument()
+    expect(screen.queryByText('99.98%')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tokens routed yesterday')).not.toBeInTheDocument()
+    expect(screen.queryByText('30-day availability')).not.toBeInTheDocument()
+  })
+
+  it('shows an honest empty state when no live aggregates exist', async () => {
+    vi.spyOn(api, 'get').mockImplementation(((url: string) => {
+      if (url === '/api/perf-metrics/summary') {
+        return Promise.resolve({
+          data: { success: true, data: { models: [], total_requests: 0 } },
+        })
+      }
+      if (url === '/api/uptime/status') {
+        return Promise.resolve({ data: { success: true, data: [] } })
+      }
+      return Promise.reject(new Error(`unexpected ${url}`))
+    }) as typeof api.get)
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <StatsStrip />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('No stats yet')).toBeVisible()
+    })
+    expect(
+      screen.getByText('Live success rate appears after requests are recorded.')
+    ).toBeVisible()
+    expect(screen.queryByText('796B+')).not.toBeInTheDocument()
+    expect(screen.queryByText('>99%')).not.toBeInTheDocument()
+    expect(screen.queryByText('99.98%')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tokens routed yesterday')).not.toBeInTheDocument()
+    expect(screen.queryByText('Prompt cache hit rate')).not.toBeInTheDocument()
+    expect(screen.queryByText('30-day availability')).not.toBeInTheDocument()
   })
 })
 

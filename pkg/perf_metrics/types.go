@@ -57,7 +57,9 @@ type ModelSummary struct {
 }
 
 type SummaryAllResult struct {
-	Models []ModelSummary `json:"models"`
+	Models        []ModelSummary `json:"models"`
+	TotalRequests int64          `json:"total_requests"`
+	SuccessRate   *float64       `json:"success_rate,omitempty"`
 }
 
 type bucketKey struct {

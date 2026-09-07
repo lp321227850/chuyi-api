@@ -16,11 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { TeamoPricingTable } from '../components/teamo-pricing-table'
+import { buildGroupPerformance } from '../lib/mock-stats'
 import { TEAMO_TABLE_PREVIEW_COUNT } from '../lib/teamo-display'
 import type { PricingModel } from '../types'
 
@@ -42,6 +44,20 @@ function model(index: number): PricingModel {
   }
 }
 
+function renderTable(
+  models: PricingModel[],
+  successRates: Record<string, number> = {}
+) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <TeamoPricingTable models={models} successRates={successRates} />
+    </QueryClientProvider>
+  )
+}
+
 describe('TeamoPricingTable', () => {
   it('highlights Chuyi price columns and can expand beyond the preview', async () => {
     const user = userEvent.setup()
@@ -49,7 +65,7 @@ describe('TeamoPricingTable', () => {
       { length: TEAMO_TABLE_PREVIEW_COUNT + 2 },
       (_, i) => model(i + 1)
     )
-    render(<TeamoPricingTable models={models} />)
+    renderTable(models)
 
     expect(screen.getByText('Input (Chuyi)')).toBeVisible()
     expect(screen.getByText('Output (Chuyi)')).toBeVisible()
@@ -63,5 +79,26 @@ describe('TeamoPricingTable', () => {
       screen.getByText(`model-${TEAMO_TABLE_PREVIEW_COUNT + 1}`)
     ).toBeVisible()
     expect(screen.getByRole('button', { name: 'Show less' })).toBeVisible()
+  })
+
+  it('shows an honest placeholder instead of generated mock uptime', () => {
+    const sample = model(1)
+    const fakeUptime = buildGroupPerformance(sample)[0]?.uptime_30d_pct
+    renderTable([sample], {})
+
+    expect(screen.getByText('Success rate')).toBeVisible()
+    expect(screen.getByText('—')).toBeVisible()
+    if (fakeUptime != null) {
+      expect(
+        screen.queryByText(`${fakeUptime.toFixed(2)}%`)
+      ).not.toBeInTheDocument()
+    }
+  })
+
+  it('renders a real 24h success rate when the summary API supplies one', () => {
+    renderTable([model(1)], { 'model-1': 97.5 })
+
+    expect(screen.getByText('97.50%')).toBeVisible()
+    expect(screen.queryByText('—')).not.toBeInTheDocument()
   })
 })

@@ -16,15 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { getPerfMetricsSummary } from '@/features/performance-metrics/api'
+import { formatUptimePct } from '@/features/performance-metrics/lib/format'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
 import { DEFAULT_TOKEN_UNIT } from '../constants'
-import { buildGroupPerformance } from '../lib/mock-stats'
 import { isTokenBasedModel } from '../lib/model-helpers'
 import {
   formatListPrice,
@@ -46,6 +48,7 @@ export interface TeamoPricingTableProps {
   showRechargePrice?: boolean
   selectedGroup?: string
   onModelClick?: (modelName: string) => void
+  successRates?: Record<string, number>
 }
 
 function DiscountBadge(props: { percent: number | null }) {
@@ -89,6 +92,27 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
     ? props.models
     : props.models.slice(0, TEAMO_TABLE_PREVIEW_COUNT)
   const canToggle = props.models.length > TEAMO_TABLE_PREVIEW_COUNT
+  const perfQuery = useQuery({
+    queryKey: ['perf-metrics-summary', 24],
+    queryFn: () => getPerfMetricsSummary(24),
+    staleTime: 60 * 1000,
+    retry: false,
+    enabled: props.successRates == null,
+  })
+  const successRates = useMemo(() => {
+    if (props.successRates) return props.successRates
+    const map: Record<string, number> = {}
+    for (const model of perfQuery.data?.data?.models ?? []) {
+      if (
+        Number.isFinite(model.success_rate) &&
+        model.success_rate >= 0 &&
+        model.success_rate <= 100
+      ) {
+        map[model.model_name] = model.success_rate
+      }
+    }
+    return map
+  }, [perfQuery.data?.data?.models, props.successRates])
 
   return (
     <div className='space-y-4'>
@@ -107,7 +131,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                 {t('Output (Chuyi)')}
               </th>
               <th className='px-3 py-3 font-medium'>{t('Provider')}</th>
-              <th className='px-4 py-3 font-medium'>{t('Availability')}</th>
+              <th className='px-4 py-3 font-medium'>{t('Success rate')}</th>
             </tr>
           </thead>
           <tbody>
@@ -171,7 +195,12 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                     )
                   )
                 : '-'
-              const uptime = buildGroupPerformance(model)[0]?.uptime_30d_pct
+              const successRate = successRates[model.model_name]
+              const hasSuccessRate =
+                successRate != null &&
+                Number.isFinite(successRate) &&
+                successRate >= 0 &&
+                successRate <= 100
               const vendorIcon = model.vendor_icon
                 ? getLobeIcon(model.vendor_icon, 16)
                 : null
@@ -234,7 +263,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                   <td className='px-4 py-3'>
                     <div className='flex items-center gap-2'>
                       <span className='font-medium tabular-nums'>
-                        {uptime ? `${uptime.toFixed(2)}%` : '—'}
+                        {hasSuccessRate ? formatUptimePct(successRate) : '—'}
                       </span>
                       <span
                         className='h-1.5 w-10 overflow-hidden rounded-full bg-[var(--chuyi-line,#e6e0d6)]'
@@ -243,7 +272,9 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                         <span
                           className='block h-full rounded-full bg-gradient-to-r from-emerald-500 to-[var(--chuyi-orange,#ff6a00)]'
                           style={{
-                            width: `${Math.min(100, Math.max(12, uptime ?? 0))}%`,
+                            width: hasSuccessRate
+                              ? `${Math.min(100, Math.max(0, successRate))}%`
+                              : '0%',
                           }}
                         />
                       </span>
