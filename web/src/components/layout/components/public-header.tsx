@@ -410,7 +410,10 @@ export function PublicHeader(props: PublicHeaderProps) {
       {/* Mobile full-screen overlay */}
       <div
         className={cn(
-          'bg-background/98 fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:pointer-events-none sm:hidden',
+          'fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:pointer-events-none sm:hidden',
+          isMarketing
+            ? 'bg-[var(--chuyi-cream,#fffefb)]/98'
+            : 'bg-background/98',
           mobileOpen
             ? 'pointer-events-auto opacity-100'
             : 'pointer-events-none opacity-0'
@@ -483,7 +486,12 @@ export function PublicHeader(props: PublicHeaderProps) {
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                className={cn(
+                  'inline-flex h-10 items-center justify-center text-sm font-medium',
+                  isMarketing
+                    ? 'chuyi-press rounded-full bg-[var(--chuyi-ink,#141414)] px-5 text-[var(--chuyi-cream,#fffefb)] hover:bg-black'
+                    : 'bg-foreground text-background rounded-lg transition-opacity hover:opacity-90 active:opacity-80'
+                )}
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
               </Link>

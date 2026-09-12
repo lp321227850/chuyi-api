@@ -360,7 +360,7 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
                   className='max-lg:static lg:sticky lg:top-[var(--chuyi-header-offset,5.25rem)] z-20 bg-[var(--chuyi-cream,#fffefb)] px-3 py-3 font-medium'
                   title={t('24h request success rate')}
                 >
-                  {t('Uptime (SLA)')}
+                  {t('24h request success rate')}
                 </th>
               </tr>
             </thead>

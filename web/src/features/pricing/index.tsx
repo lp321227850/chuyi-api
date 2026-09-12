@@ -59,9 +59,12 @@ export function Pricing() {
     endpointMap,
     autoGroups,
     isLoading,
+    isError,
+    refetch,
     priceRate,
     usdExchangeRate,
   } = usePricingData()
+  const hasCatalog = (models?.length ?? 0) > 0
 
   const {
     searchInput,
@@ -205,91 +208,109 @@ export function Pricing() {
             </p>
           </header>
 
-          {(models?.length ?? 0) > 0 ? (
-            <FeaturedModelCards
-              models={featuredModels}
-              priceRate={priceRate}
-              usdExchangeRate={usdExchangeRate}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-              selectedGroup={groupFilter}
-              onModelClick={handleModelClick}
+          {isError ? (
+            <EmptyState
+              variant='error'
+              onRetry={() => {
+                void refetch()
+              }}
             />
           ) : null}
 
-          <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
-            <VendorFilterPills
-              vendors={vendors || []}
-              value={vendorFilter}
-              onChange={setVendorFilter}
-            />
-            <SearchBar
-              value={searchInput}
-              onChange={setSearchInput}
-              onClear={clearSearch}
-              placeholder={t('Search models')}
-              className='w-full lg:max-w-sm'
-            />
-          </div>
+          {!isError && !hasCatalog ? (
+            <div className='space-y-4'>
+              <EmptyState variant='catalog' />
+              <PricingCtaBanner />
+            </div>
+          ) : null}
 
-          <main className='min-w-0 max-w-full space-y-4'>
-            <PricingToolbar
-              filteredCount={filteredModels.length}
-              totalCount={models?.length}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              tokenUnit={tokenUnit}
-              onTokenUnitChange={setTokenUnit}
-              showRechargePrice={showRechargePrice}
-              onRechargePriceChange={setShowRechargePrice}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              quotaTypeFilter={quotaTypeFilter}
-              endpointTypeFilter={endpointTypeFilter}
-              vendorFilter={vendorFilter}
-              groupFilter={groupFilter}
-              tagFilter={tagFilter}
-              onQuotaTypeChange={setQuotaTypeFilter}
-              onEndpointTypeChange={setEndpointTypeFilter}
-              onVendorChange={setVendorFilter}
-              onGroupChange={setGroupFilter}
-              onTagChange={setTagFilter}
-              vendors={vendors || []}
-              groups={availableGroups}
-              groupRatios={groupRatio}
-              tags={availableTags}
-              models={models || []}
-              hasActiveFilters={hasActiveFilters}
-              activeFilterCount={activeFilterCount}
-              onClearFilters={clearFilters}
-            />
+          {!isError && hasCatalog ? (
+            <>
+              <FeaturedModelCards
+                models={featuredModels}
+                priceRate={priceRate}
+                usdExchangeRate={usdExchangeRate}
+                tokenUnit={tokenUnit}
+                showRechargePrice={showRechargePrice}
+                selectedGroup={groupFilter}
+                onModelClick={handleModelClick}
+              />
 
-            {renderPricingContent()}
-            <PricingCtaBanner />
-          </main>
+              <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+                <VendorFilterPills
+                  vendors={vendors || []}
+                  value={vendorFilter}
+                  onChange={setVendorFilter}
+                />
+                <SearchBar
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  onClear={clearSearch}
+                  placeholder={t('Search models')}
+                  className='w-full lg:max-w-sm'
+                />
+              </div>
 
-          {selectedModel && (
-            <ModelDetailsDrawer
-              open={Boolean(selectedModel)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedModelName(null)
-              }}
-              model={selectedModel}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroup || {}}
-              endpointMap={
-                (endpointMap as Record<
-                  string,
-                  { path?: string; method?: string }
-                >) || {}
-              }
-              autoGroups={autoGroups || []}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
-          )}
+              <main className='min-w-0 max-w-full space-y-4'>
+                <PricingToolbar
+                  filteredCount={filteredModels.length}
+                  totalCount={models?.length}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  tokenUnit={tokenUnit}
+                  onTokenUnitChange={setTokenUnit}
+                  showRechargePrice={showRechargePrice}
+                  onRechargePriceChange={setShowRechargePrice}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  quotaTypeFilter={quotaTypeFilter}
+                  endpointTypeFilter={endpointTypeFilter}
+                  vendorFilter={vendorFilter}
+                  groupFilter={groupFilter}
+                  tagFilter={tagFilter}
+                  onQuotaTypeChange={setQuotaTypeFilter}
+                  onEndpointTypeChange={setEndpointTypeFilter}
+                  onVendorChange={setVendorFilter}
+                  onGroupChange={setGroupFilter}
+                  onTagChange={setTagFilter}
+                  vendors={vendors || []}
+                  groups={availableGroups}
+                  groupRatios={groupRatio}
+                  tags={availableTags}
+                  models={models || []}
+                  hasActiveFilters={hasActiveFilters}
+                  activeFilterCount={activeFilterCount}
+                  onClearFilters={clearFilters}
+                />
+
+                {renderPricingContent()}
+                <PricingCtaBanner />
+              </main>
+
+              {selectedModel ? (
+                <ModelDetailsDrawer
+                  open={Boolean(selectedModel)}
+                  onOpenChange={(open) => {
+                    if (!open) setSelectedModelName(null)
+                  }}
+                  model={selectedModel}
+                  groupRatio={groupRatio || {}}
+                  usableGroup={usableGroup || {}}
+                  endpointMap={
+                    (endpointMap as Record<
+                      string,
+                      { path?: string; method?: string }
+                    >) || {}
+                  }
+                  autoGroups={autoGroups || []}
+                  priceRate={priceRate ?? 1}
+                  usdExchangeRate={usdExchangeRate ?? 1}
+                  tokenUnit={tokenUnit}
+                  showRechargePrice={showRechargePrice}
+                />
+              ) : null}
+            </>
+          ) : null}
         </div>
         <AnimateInView>
           <StatsStrip />

@@ -81,7 +81,7 @@ describe('TeamoPricingTable', () => {
 
     expect(screen.getByText('Input (Chuyi)')).toBeVisible()
     expect(screen.getByText('Output (Chuyi)')).toBeVisible()
-    expect(screen.getByText('Uptime (SLA)')).toBeVisible()
+    expect(screen.getByText('24h request success rate')).toBeVisible()
     expect(screen.getByText('model-1')).toBeVisible()
     expect(screen.getAllByText('200K').length).toBeGreaterThan(0)
     expect(
@@ -100,7 +100,7 @@ describe('TeamoPricingTable', () => {
     const fakeUptime = buildGroupPerformance(sample)[0]?.uptime_30d_pct
     renderTable([sample], {})
 
-    expect(screen.getByText('Uptime (SLA)')).toBeVisible()
+    expect(screen.getByText('24h request success rate')).toBeVisible()
     expect(screen.getByText('—')).toBeVisible()
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
     expect(screen.queryByText('99.98%')).not.toBeInTheDocument()

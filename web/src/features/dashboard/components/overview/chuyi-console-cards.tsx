@@ -288,7 +288,7 @@ function AgentCard(props: {
         search={{ client: props.client }}
         className='mt-3 inline-flex text-xs font-medium text-[var(--chuyi-orange,#ff6a00)]'
       >
-        {t('View steps')} →
+        {t('View steps')}
       </Link>
     </article>
   )

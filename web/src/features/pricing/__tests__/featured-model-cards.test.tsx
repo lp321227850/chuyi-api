@@ -45,7 +45,7 @@ function model(overrides: Partial<PricingModel> = {}): PricingModel {
 describe('FeaturedModelCards', () => {
   it('shows an honest empty state instead of invented featured prices', () => {
     render(<FeaturedModelCards models={[]} />)
-    expect(screen.getByText('No stats yet')).toBeVisible()
+    expect(screen.getByText('No featured models yet')).toBeVisible()
     expect(screen.queryByText('99.98%')).not.toBeInTheDocument()
     expect(screen.queryByText('1×')).not.toBeInTheDocument()
     expect(screen.queryByText('90% off')).not.toBeInTheDocument()

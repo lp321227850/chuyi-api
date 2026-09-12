@@ -46,7 +46,9 @@ export function FeaturedModelCards(props: FeaturedModelCardsProps) {
   if (props.models.length === 0) {
     return (
       <div className='mb-6 rounded-2xl border border-dashed border-[var(--chuyi-line,#e6e0d6)] bg-white px-4 py-6 text-center'>
-        <p className='text-muted-foreground text-sm'>{t('No stats yet')}</p>
+        <p className='text-muted-foreground text-sm'>
+          {t('No featured models yet')}
+        </p>
       </div>
     )
   }
