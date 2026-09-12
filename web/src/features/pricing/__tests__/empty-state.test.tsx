@@ -20,7 +20,18 @@ import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { getPricing } from '../api'
 import { EmptyState } from '../components/empty-state'
+
+const apiMocks = vi.hoisted(() => ({
+  get: vi.fn(),
+}))
+
+vi.mock('@/lib/api', () => ({
+  api: {
+    get: apiMocks.get,
+  },
+}))
 
 afterEach(() => {
   cleanup()
@@ -80,5 +91,27 @@ describe('EmptyState', () => {
 
     await user.click(screen.getByRole('button', { name: 'Clear all filters' }))
     expect(onClearFilters).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('getPricing', () => {
+  afterEach(() => {
+    apiMocks.get.mockReset()
+  })
+
+  it('keeps HTTP catalog failures on the pricing page instead of throwing', async () => {
+    apiMocks.get.mockRejectedValue({ response: { status: 500 } })
+
+    const payload = await getPricing()
+
+    expect(payload.success).toBe(false)
+    expect(payload.data).toEqual([])
+    expect(apiMocks.get).toHaveBeenCalledWith(
+      '/api/pricing',
+      expect.objectContaining({
+        skipErrorHandler: true,
+        skipBusinessError: true,
+      })
+    )
   })
 })
