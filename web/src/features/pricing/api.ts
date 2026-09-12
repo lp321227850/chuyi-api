@@ -24,8 +24,30 @@ import type { PricingData } from './types'
 // Pricing APIs
 // ----------------------------------------------------------------------------
 
-// Get model pricing data
+const failedPricing: PricingData = {
+  success: false,
+  data: [],
+  vendors: [],
+  group_ratio: {},
+  usable_group: {},
+  supported_endpoint: {},
+  auto_groups: [],
+}
+
+// Get model pricing data. Catalog failures stay on /pricing so the page
+// can render an in-place retry instead of the global /500 route.
 export async function getPricing(): Promise<PricingData> {
-  const res = await api.get('/api/pricing')
-  return res.data
+  try {
+    const res = await api.get('/api/pricing', {
+      skipErrorHandler: true,
+      skipBusinessError: true,
+    })
+    const payload = res.data as PricingData | undefined
+    if (payload && typeof payload.success === 'boolean') {
+      return payload
+    }
+    return failedPricing
+  } catch {
+    return failedPricing
+  }
 }
