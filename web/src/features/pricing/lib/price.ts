@@ -20,7 +20,11 @@ import { formatCurrencyFromUSD } from '@/lib/currency'
 
 import { QUOTA_TYPE_VALUES, TOKEN_UNIT_DIVISORS } from '../constants'
 import type { PricingModel, TokenUnit, PriceType } from '../types'
-import { getConfiguredGroupRatio, getDisplayGroupRatio } from './model-helpers'
+import {
+  getConfiguredGroupRatio,
+  getDisplayGroupRatio,
+  modelAppliesToBillingGroup,
+} from './model-helpers'
 
 // ----------------------------------------------------------------------------
 // Price Calculation Utilities
@@ -267,6 +271,145 @@ export function formatRequestPrice(
   return formatCurrencyFromUSD(priceInUSD, {
     digitsLarge: 4,
     digitsSmall: 4,
+    abbreviate: false,
+  })
+}
+
+export function getConfiguredModelDiscountRatio(model: PricingModel): number {
+  if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
+    const base = model.base_model_price
+    const current = model.model_price
+    if (
+      typeof base === 'number' &&
+      Number.isFinite(base) &&
+      base > 0 &&
+      typeof current === 'number' &&
+      Number.isFinite(current) &&
+      current > 0 &&
+      current < base
+    ) {
+      return current / base
+    }
+    return 1
+  }
+
+  const base = model.base_model_ratio
+  const current = model.model_ratio
+  if (
+    typeof base === 'number' &&
+    Number.isFinite(base) &&
+    base > 0 &&
+    typeof current === 'number' &&
+    Number.isFinite(current) &&
+    current > 0 &&
+    current < base
+  ) {
+    return current / base
+  }
+  return 1
+}
+
+export function getSiteDiscountRatio(
+  model: PricingModel,
+  selectedGroup?: string
+): number {
+  return (
+    getDisplayGroupRatio(model, selectedGroup) *
+    getConfiguredModelDiscountRatio(model)
+  )
+}
+
+export function formatDiscountPercent(ratio: number): number | null {
+  if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
+    return null
+  }
+  return Math.max(1, Math.round((1 - ratio) * 100))
+}
+
+export function getSiteDiscountPercent(
+  model: PricingModel,
+  selectedGroup?: string
+): number | null {
+  return formatDiscountPercent(getSiteDiscountRatio(model, selectedGroup))
+}
+
+/**
+ * Chinese fold (折) of a group ratio: 0.08 → "0.8", 0.11 → "1.1", 0.1 → "1".
+ * Returns null when the ratio is not a real discount versus list (1).
+ */
+export function formatDiscountFold(ratio: number): string | null {
+  if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) {
+    return null
+  }
+  const fold = Math.round(ratio * 10 * 10) / 10
+  if (fold <= 0) return null
+  return Number.isInteger(fold) ? String(fold) : fold.toFixed(1)
+}
+
+export function getSiteDiscountFold(
+  model: PricingModel,
+  selectedGroup?: string
+): string | null {
+  return formatDiscountFold(getSiteDiscountRatio(model, selectedGroup))
+}
+
+export function getMaxSiteDiscountFold(
+  models: PricingModel[],
+  selectedGroup?: string
+): string | null {
+  let minRatio: number | null = null
+  for (const model of models) {
+    if (!modelAppliesToBillingGroup(model, selectedGroup)) continue
+    const ratio = getSiteDiscountRatio(model, selectedGroup)
+    if (!Number.isFinite(ratio) || ratio <= 0 || ratio >= 0.995) continue
+    if (minRatio == null || ratio < minRatio) {
+      minRatio = ratio
+    }
+  }
+  return minRatio == null ? null : formatDiscountFold(minRatio)
+}
+
+export function formatListPrice(
+  model: PricingModel,
+  type: PriceType,
+  tokenUnit: TokenUnit,
+  showWithRecharge = false,
+  priceRate = 1,
+  usdExchangeRate = 1
+): string {
+  const modelDiscount = getConfiguredModelDiscountRatio(model)
+
+  if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
+    let priceInUSD = model.model_price || 0
+    if (modelDiscount > 0 && modelDiscount < 1) {
+      priceInUSD = priceInUSD / modelDiscount
+    }
+    priceInUSD = applyRechargeRate(
+      priceInUSD,
+      showWithRecharge,
+      priceRate,
+      usdExchangeRate
+    )
+    return formatCurrencyFromUSD(priceInUSD, {
+      digitsLarge: 4,
+      digitsSmall: 4,
+      abbreviate: false,
+    })
+  }
+
+  const listMultiplier =
+    modelDiscount > 0 && modelDiscount < 1 ? 1 / modelDiscount : 1
+  let priceInUSD = calculateTokenPrice(model, type, listMultiplier)
+  priceInUSD = applyRechargeRate(
+    priceInUSD,
+    showWithRecharge,
+    priceRate,
+    usdExchangeRate
+  )
+  const price = priceInUSD / TOKEN_UNIT_DIVISORS[tokenUnit]
+  return formatCurrencyFromUSD(price, {
+    digitsLarge: 4,
+    digitsSmall: 6,
     abbreviate: false,
   })
 }

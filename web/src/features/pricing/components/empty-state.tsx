@@ -16,43 +16,74 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Search } from 'lucide-react'
+import { AlertCircle, Inbox, Search } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 
+export type EmptyStateVariant = 'filters' | 'catalog' | 'error'
+
 export interface EmptyStateProps {
+  variant?: EmptyStateVariant
   searchQuery?: string
-  hasActiveFilters: boolean
-  onClearFilters: () => void
+  hasActiveFilters?: boolean
+  onClearFilters?: () => void
+  onRetry?: () => void
 }
 
 export function EmptyState(props: EmptyStateProps) {
   const { t } = useTranslation()
+  const variant = props.variant ?? 'filters'
   const hasSearch = Boolean(props.searchQuery?.trim())
+
+  let Icon = Search
+  let title = t('No models found')
+  let description = t('No models match your current filters.')
+  if (hasSearch) {
+    description = t(
+      'No results for "{{query}}". Try adjusting your search or filters.',
+      { query: props.searchQuery }
+    )
+  }
+  if (variant === 'error') {
+    Icon = AlertCircle
+    title = t('Failed to load model pricing')
+    description = t('Please try again later.')
+  } else if (variant === 'catalog') {
+    Icon = Inbox
+    title = t('No models available')
+    description = t('No models are published in the catalog yet.')
+  }
+
+  let action: ReactNode = null
+  if (variant === 'error' && props.onRetry) {
+    action = (
+      <Button variant='outline' size='sm' onClick={props.onRetry}>
+        {t('Retry')}
+      </Button>
+    )
+  } else if (
+    variant === 'filters' &&
+    (props.hasActiveFilters || hasSearch) &&
+    props.onClearFilters
+  ) {
+    action = (
+      <Button variant='outline' size='sm' onClick={props.onClearFilters}>
+        {t('Clear all filters')}
+      </Button>
+    )
+  }
 
   return (
     <div className='flex min-h-[320px] flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center'>
-      <Search className='text-muted-foreground/40 mb-3 size-10' />
+      <Icon className='text-muted-foreground/40 mb-3 size-10' />
 
-      <h3 className='text-foreground mb-1 text-base font-semibold'>
-        {t('No models found')}
-      </h3>
+      <h3 className='text-foreground mb-1 text-base font-semibold'>{title}</h3>
 
-      <p className='text-muted-foreground mb-5 max-w-xs text-sm'>
-        {hasSearch
-          ? t(
-              'No results for "{{query}}". Try adjusting your search or filters.',
-              { query: props.searchQuery }
-            )
-          : t('No models match your current filters.')}
-      </p>
+      <p className='text-muted-foreground mb-5 max-w-xs text-sm'>{description}</p>
 
-      {(props.hasActiveFilters || hasSearch) && (
-        <Button variant='outline' size='sm' onClick={props.onClearFilters}>
-          {t('Clear all filters')}
-        </Button>
-      )}
+      {action}
     </div>
   )
 }

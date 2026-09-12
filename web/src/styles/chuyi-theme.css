@@ -1,0 +1,328 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/* TeamoRouter-inspired cream surface for user-facing Chuyi pages.
+ * Scoped so admin chrome and user-selected dark mode stay intact outside
+ * `[data-chuyi-theme]`. Variables are repeated under `.dark` so nested
+ * marketing/console surfaces stay light even when the document is dark. */
+[data-chuyi-theme],
+.dark [data-chuyi-theme] {
+  color-scheme: light;
+  --chuyi-cream: #fffefb;
+  --chuyi-ink: #141414;
+  --chuyi-orange: #ff6a00;
+  --chuyi-peach: #fff1e4;
+  --chuyi-peach-strong: #ffe4cc;
+  --chuyi-pink: #ffe8ee;
+  --chuyi-lavender: #eef1ff;
+  --chuyi-cyan: #c8e8ee;
+  --chuyi-muted: #6d675f;
+  --chuyi-line: #e6e0d6;
+  --chuyi-card: #ffffff;
+  --background: #fffefb;
+  --foreground: #141414;
+  --card: #ffffff;
+  --card-foreground: #141414;
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+  --primary: #141414;
+  --primary-foreground: #fffefb;
+  --secondary: #f6f1ea;
+  --secondary-foreground: #141414;
+  --muted: #f6f1ea;
+  --muted-foreground: #6d675f;
+  --accent: #fff1e4;
+  --accent-foreground: #141414;
+  --border: #e6e0d6;
+  --input: #e6e0d6;
+  --ring: #ff6a00;
+  --sidebar: #fffefb;
+  --sidebar-foreground: #141414;
+  --sidebar-primary: #141414;
+  --sidebar-primary-foreground: #fffefb;
+  --sidebar-accent: #fff1e4;
+  --sidebar-accent-foreground: #141414;
+  --sidebar-border: #e6e0d6;
+  --chuyi-header-offset: 5.25rem;
+  background-color: var(--chuyi-cream);
+  color: var(--chuyi-ink);
+}
+
+[data-chuyi-theme][data-chuyi-announce='on'] {
+  --chuyi-header-offset: 7.25rem;
+}
+
+.chuyi-mesh {
+  background:
+    radial-gradient(
+      ellipse 55% 50% at 32% 38%,
+      rgb(255 176 140 / 48%) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 48% 42% at 70% 32%,
+      rgb(170 220 230 / 42%) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 42% 38% at 52% 72%,
+      rgb(255 220 190 / 38%) 0%,
+      transparent 72%
+    );
+  will-change: transform;
+}
+
+.chuyi-footer-accent {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #b9a4e8 0%,
+    #f3c4a8 42%,
+    #ff8a4c 72%,
+    #ff6a00 100%
+  );
+}
+
+.chuyi-hairline {
+  border-color: var(--chuyi-line);
+}
+
+.chuyi-dashed {
+  border-style: dashed;
+}
+
+@keyframes chuyi-dot-flow {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes chuyi-mesh-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.6%, -1.2%, 0) scale(1.035);
+  }
+}
+
+@keyframes chuyi-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chuyi-code-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chuyi-row-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.chuyi-enter {
+  animation: chuyi-enter 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chuyi-enter-delay-1 {
+  animation-delay: 70ms;
+}
+
+.chuyi-enter-delay-2 {
+  animation-delay: 140ms;
+}
+
+.chuyi-enter-delay-3 {
+  animation-delay: 210ms;
+}
+
+.chuyi-enter-delay-4 {
+  animation-delay: 280ms;
+}
+
+.chuyi-nav-link {
+  position: relative;
+}
+
+.chuyi-nav-link::after {
+  content: '';
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.2rem;
+  left: 0.75rem;
+  height: 1.5px;
+  transform: scaleX(0);
+  background: var(--chuyi-orange, #ff6a00);
+  transition: transform 180ms ease;
+}
+
+.chuyi-nav-link:hover::after,
+.chuyi-nav-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+.chuyi-nav-link:hover::after {
+  opacity: 0.4;
+}
+
+.chuyi-nav-link[aria-current='page']::after {
+  opacity: 1;
+}
+
+.chuyi-tab {
+  position: relative;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.chuyi-tab[aria-selected='true'] {
+  border-bottom-color: var(--chuyi-ink, #141414);
+}
+
+.chuyi-pill {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 160ms ease;
+}
+
+.chuyi-lift {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.chuyi-press {
+  transition: transform 140ms ease;
+}
+
+.chuyi-code-fade {
+  animation: chuyi-code-fade 0.22s ease both;
+}
+
+.chuyi-code-swap {
+  overflow: hidden;
+}
+
+.chuyi-table-row {
+  animation: chuyi-row-enter 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: background-color 160ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chuyi-mesh {
+    animation: chuyi-mesh-drift 18s ease-in-out infinite;
+  }
+
+  .chuyi-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgb(20 20 20 / 0.06);
+  }
+
+  .chuyi-press:active {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  .chuyi-pill:active {
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chuyi-mesh,
+  .chuyi-flow-dot,
+  .chuyi-enter,
+  .chuyi-enter-delay-1,
+  .chuyi-enter-delay-2,
+  .chuyi-enter-delay-3,
+  .chuyi-enter-delay-4,
+  .chuyi-code-fade,
+  .chuyi-table-row {
+    animation: none !important;
+  }
+
+  .chuyi-enter,
+  .chuyi-code-fade,
+  .chuyi-table-row {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .chuyi-code-swap {
+    overflow: visible;
+  }
+
+  .chuyi-flow-dot {
+    opacity: 0.7;
+  }
+
+  .chuyi-lift,
+  .chuyi-press,
+  .chuyi-pill,
+  .chuyi-nav-link::after,
+  .chuyi-tab {
+    transition: none !important;
+  }
+}
+
+/* Clip document overflow below lg. overflow-x: clip on html/body keeps
+ * scrollWidth from growing past clientWidth (classic 100vw / scrollbar
+ * gutter miss). Do not apply at lg+ — that would break sticky thead. */
+@media (width < 64rem) {
+  html:has([data-chuyi-theme]),
+  html:has([data-chuyi-theme]) body,
+  html:has([data-chuyi-theme]) #root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+}

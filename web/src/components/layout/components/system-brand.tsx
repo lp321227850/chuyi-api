@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { BrandMark, resolveMarketingSiteName } from '@/components/chuyi'
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/sidebar'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { DEFAULT_LOGO } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 type SystemBrandProps = {
@@ -51,9 +53,25 @@ export function SystemBrand(props: SystemBrandProps) {
   const { logo } = useSystemConfig()
 
   const variant = props.variant ?? 'sidebar'
-  const name = status?.system_name || props.defaultName || 'New API'
+  const systemName =
+    typeof status?.system_name === 'string' ? status.system_name : undefined
+  const name = resolveMarketingSiteName({
+    systemName,
+    fallback: props.defaultName || t('Chuyi API'),
+  })
+  const hasCustomLogo =
+    Boolean(logo) && logo !== DEFAULT_LOGO && logo !== 'logo.png'
   const version =
     status?.version || props.defaultVersion || t('Unknown version')
+  const mark = hasCustomLogo ? (
+    <img
+      src={logo}
+      alt={t('Logo')}
+      className='size-full rounded-md object-cover'
+    />
+  ) : (
+    <BrandMark className='size-full text-[10px]' />
+  )
 
   if (variant === 'inline') {
     return (
@@ -66,11 +84,7 @@ export function SystemBrand(props: SystemBrandProps) {
         )}
       >
         <div className='flex size-5 items-center justify-center overflow-hidden rounded-md'>
-          <img
-            src={logo}
-            alt={t('Logo')}
-            className='size-full rounded-md object-cover'
-          />
+          {mark}
         </div>
         <span className='max-w-[12rem] truncate'>{name}</span>
       </Link>
@@ -86,11 +100,7 @@ export function SystemBrand(props: SystemBrandProps) {
           render={<div />}
         >
           <div className='flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg'>
-            <img
-              src={logo}
-              alt={t('Logo')}
-              className='size-full rounded-lg object-cover'
-            />
+            {mark}
           </div>
           <div className='grid flex-1 text-start text-sm leading-tight group-data-[collapsible=icon]:hidden'>
             <span className='truncate font-semibold'>{name}</span>

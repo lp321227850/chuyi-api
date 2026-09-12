@@ -74,6 +74,7 @@ import {
 import { parseTags } from '../lib/filters'
 import { getAvailableGroups, isTokenBasedModel } from '../lib/model-helpers'
 import { formatFixedPrice, formatGroupPrice } from '../lib/price'
+import { resolveConfiguredContextLength } from '../lib/teamo-display'
 import {
   evaluateTaskUsageExamples,
   getTaskEnumFields,
@@ -247,7 +248,7 @@ function OverviewSummaryGrid(props: { model: PricingModel }) {
     staleTime: 60 * 1000,
   })
 
-  const groups = metricsQuery.data?.data.groups ?? []
+  const groups = metricsQuery.data?.data?.groups ?? []
   const successRates = groups
     .map((group) => group.success_rate)
     .filter((rate) => Number.isFinite(rate))
@@ -349,7 +350,7 @@ function ModelBackendQuickStats(props: { model: PricingModel }) {
   const model = props.model
   const inputModalities = normalizeCatalogItems(model.input_modalities)
   const outputModalities = normalizeCatalogItems(model.output_modalities)
-  const contextLength = model.context_length ?? 0
+  const contextLength = resolveConfiguredContextLength(model) ?? 0
   const maxOutput = model.max_output_tokens ?? 0
   const knowledgeCutoff = formatCatalogYearMonth(model.knowledge_cutoff)
   const releaseDate = formatCatalogYearMonth(model.release_date)

@@ -29,3 +29,7 @@ export {
   ModelDetailsDrawer,
 } from './model-details'
 export { PricingTable } from './pricing-table'
+export { TeamoPricingTable } from './teamo-pricing-table'
+export { FeaturedModelCards } from './featured-model-cards'
+export { PricingCtaBanner } from './pricing-cta-banner'
+export { VendorFilterPills } from './vendor-filter-pills'

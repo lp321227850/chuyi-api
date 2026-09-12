@@ -51,11 +51,31 @@ export function getConfiguredGroupRatio(
 }
 
 /**
+ * Whether this catalog row is billed under the selected group.
+ * Empty / `all` enable_groups mean the model is offered in every billing group.
+ */
+export function modelAppliesToBillingGroup(
+  model: PricingModel,
+  selectedGroup?: string
+): boolean {
+  if (!selectedGroup || selectedGroup === FILTER_ALL) return true
+  const modelEnableGroups = Array.isArray(model.enable_groups)
+    ? model.enable_groups
+    : []
+  if (modelEnableGroups.length === 0 || modelEnableGroups.includes('all')) {
+    return true
+  }
+  return modelEnableGroups.includes(selectedGroup)
+}
+
+/**
  * Resolve the group ratio used by model square summary prices.
  *
  * When no specific group is selected, the model square shows the best price
- * available to the viewer. When a group filter is active, it shows that
- * group's price instead.
+ * among billing groups the model is actually enabled for. When a group filter
+ * is active, it shows that group's price only if the row belongs to it.
+ * Unmatched enable_groups (for example a channel name) do not inherit another
+ * group's ratio.
  */
 export function getDisplayGroupRatio(
   model: PricingModel,
@@ -66,21 +86,29 @@ export function getDisplayGroupRatio(
     : []
   const groupRatio = model.group_ratio || {}
 
-  if (
-    selectedGroup &&
-    selectedGroup !== FILTER_ALL &&
-    modelEnableGroups.includes(selectedGroup)
-  ) {
+  if (selectedGroup && selectedGroup !== FILTER_ALL) {
+    if (!modelAppliesToBillingGroup(model, selectedGroup)) {
+      return 1
+    }
     return getConfiguredGroupRatio(groupRatio, selectedGroup)
   }
 
-  if (modelEnableGroups.length === 0) {
-    return 1
-  }
+  const treatAsAll =
+    modelEnableGroups.length === 0 || modelEnableGroups.includes('all')
+  const candidateGroups = treatAsAll
+    ? Object.keys(groupRatio)
+    : modelEnableGroups
 
+  return minConfiguredGroupRatio(groupRatio, candidateGroups) ?? 1
+}
+
+function minConfiguredGroupRatio(
+  groupRatio: Record<string, number>,
+  groups: string[]
+): number | null {
   let minRatio = Number.POSITIVE_INFINITY
-
-  for (const group of modelEnableGroups) {
+  for (const group of groups) {
+    if (EXCLUDED_GROUPS.includes(group) || group === 'all') continue
     const ratio = groupRatio[group]
     if (
       typeof ratio === 'number' &&
@@ -90,8 +118,7 @@ export function getDisplayGroupRatio(
       minRatio = ratio
     }
   }
-
-  return minRatio === Number.POSITIVE_INFINITY ? 1 : minRatio
+  return minRatio === Number.POSITIVE_INFINITY ? null : minRatio
 }
 
 /**

@@ -57,5 +57,7 @@ export type PerfSummaryAllData = {
   message?: string
   data: {
     models: PerfModelSummary[]
+    total_requests?: number
+    success_rate?: number
   }
 }

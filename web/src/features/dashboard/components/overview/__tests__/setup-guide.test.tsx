@@ -112,9 +112,18 @@ describe('overview setup guide', () => {
 
     const toggle = await screen.findByRole('button', { name: 'Setup guide' })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('heading', { name: 'Overview' })).toBeVisible()
     expect(
-      screen.getAllByRole('heading').map((heading) => heading.textContent)
-    ).toEqual(['Overview', 'Usage at a glance'])
+      screen.queryByRole('heading', { name: 'Usage at a glance' })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Account balance' })
+    ).toBeVisible()
+    expect(
+      screen.getByRole('heading', { name: 'Last 24h usage' })
+    ).toBeVisible()
+    expect(screen.queryByText("Today's usage")).not.toBeInTheDocument()
+    expect(screen.queryByText(/Used this month/)).not.toBeInTheDocument()
     expect(screen.queryByText('Setup guide complete')).not.toBeInTheDocument()
     expect(screen.queryByText('Setup progress: 3/3')).not.toBeInTheDocument()
     for (const name of ['API Keys', 'Channels', 'Usage Logs', 'Pricing']) {

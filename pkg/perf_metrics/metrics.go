@@ -172,10 +172,13 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 	})
 
 	models := make([]ModelSummary, 0, len(totals))
+	var totalRequests, totalSuccess int64
 	for name, total := range totals {
 		if total.requestCount == 0 {
 			continue
 		}
+		totalRequests += total.requestCount
+		totalSuccess += total.successCount
 		avgLatency := total.totalLatencyMs / total.requestCount
 		successRate := float64(total.successCount) / float64(total.requestCount) * 100
 		avgTps := 0.0
@@ -195,7 +198,22 @@ func QuerySummaryAll(hours int, groups []string) (SummaryAllResult, error) {
 		return models[i].RequestCount > models[j].RequestCount
 	})
 
-	return SummaryAllResult{Models: models}, nil
+	requests, successRate := siteWideSummary(totalRequests, totalSuccess)
+	return SummaryAllResult{
+		Models:        models,
+		TotalRequests: requests,
+		SuccessRate:   successRate,
+	}, nil
+}
+
+// siteWideSummary is the request-weighted site aggregate published on
+// GET /api/perf-metrics/summary. Per-model request counts stay hidden.
+func siteWideSummary(totalRequests, totalSuccess int64) (int64, *float64) {
+	if totalRequests <= 0 {
+		return 0, nil
+	}
+	rate := math.Round(float64(totalSuccess)/float64(totalRequests)*100*100) / 100
+	return totalRequests, &rate
 }
 
 func mergeModelTotals(totals map[string]counters, modelName string, value counters) {
