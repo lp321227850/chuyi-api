@@ -164,6 +164,7 @@ describe('TeamoPricingTable', () => {
     expect(wrapper?.className).toMatch(/max-lg:overflow-x-auto/)
     expect(wrapper?.className).toMatch(/max-w-full/)
     expect(wrapper?.className).toMatch(/min-w-0/)
+    expect(screen.getByText('Swipe sideways to see all columns')).toBeInTheDocument()
     expect(wrapper?.className).not.toMatch(/(^|\s)overflow-x-auto/)
     const headerCell = screen.getByText('Model').closest('th')
     expect(headerCell).not.toBeNull()

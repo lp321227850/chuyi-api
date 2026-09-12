@@ -47,5 +47,8 @@ describe('Hero', () => {
     expect(setup).toHaveAttribute('href', '/quickstart')
     expect(screen.queryByText('Download desktop app')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Get API Key' })).toBeVisible()
+    expect(screen.getByText('Official models are live')).toBeVisible()
+    expect(screen.queryByText('Official models · up to 90% off')).not.toBeInTheDocument()
+    expect(screen.queryByText('90% off')).not.toBeInTheDocument()
   })
 })

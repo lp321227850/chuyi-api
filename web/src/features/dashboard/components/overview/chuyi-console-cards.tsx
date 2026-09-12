@@ -43,7 +43,6 @@ export function ChuyiConsoleCards() {
   const user = useAuthStore((state) => state.auth.user)
   const remainQuota = Number(user?.quota ?? 0)
   const usedQuota = Number(user?.used_quota ?? 0)
-  const requestCount = Number(user?.request_count ?? 0)
   const summaryTimeRange = useMemo(() => computeTimeRange(1), [])
 
   const usageQuery = useQuery({
@@ -80,11 +79,33 @@ export function ChuyiConsoleCards() {
       ),
     [usageQuery.data?.data]
   )
+  const recentRequests = useMemo(
+    () =>
+      (usageQuery.data?.data ?? []).reduce(
+        (total, item) => total + (Number(item.count) || 0),
+        0
+      ),
+    [usageQuery.data?.data]
+  )
   const keys = apiKeysQuery.data ?? []
   const enabledKeys = keys.filter((item) => item.status === 1)
   const previewKeys = keys.slice(0, 2)
   const runwayDays =
     remainQuota > 0 && recentUsage > 0 ? remainQuota / recentUsage : null
+  let runwayLabel = t('No recent usage')
+  if (remainQuota <= 0) {
+    runwayLabel = t('Balance depleted')
+  } else if (runwayDays !== null) {
+    if (runwayDays < 1) {
+      runwayLabel = t('Less than 1 day left')
+    } else if (runwayDays > 999) {
+      runwayLabel = t('More than 999 days left')
+    } else {
+      runwayLabel = t('About {{days}} days left', {
+        days: formatNumber(Math.floor(runwayDays)),
+      })
+    }
+  }
 
   return (
     <div data-chuyi-theme='' className='flex flex-col gap-4'>
@@ -100,13 +121,9 @@ export function ChuyiConsoleCards() {
             {formatQuota(remainQuota)}
           </p>
           <p className='text-muted-foreground mt-1 text-xs'>
-            {t('Used this month {{amount}} · estimated {{days}} days left', {
-              amount: formatQuota(usedQuota),
-              days:
-                runwayDays === null
-                  ? '—'
-                  : formatNumber(Math.max(1, Math.floor(runwayDays))),
-            })}
+            {t('Historical Usage')} {formatQuota(usedQuota)}
+            {' · '}
+            {runwayLabel}
           </p>
           <div className='mt-4 flex flex-wrap gap-2'>
             <Button
@@ -126,13 +143,13 @@ export function ChuyiConsoleCards() {
         </article>
 
         <article className='chuyi-lift rounded-2xl border border-[var(--chuyi-line,#e6e0d6)] bg-white p-4'>
-          <h3 className='text-sm font-semibold'>{t("Today's usage")}</h3>
+          <h3 className='text-sm font-semibold'>{t('Last 24h usage')}</h3>
           <p className='mt-3 text-2xl font-bold tracking-tight'>
             {formatQuota(recentUsage)}
           </p>
           <p className='text-muted-foreground mt-1 text-xs'>
-            {t('Token · {{count}} requests', {
-              count: formatNumber(requestCount),
+            {t('{{count}} requests in the last 24 hours', {
+              count: formatNumber(recentRequests),
             })}
           </p>
           <div className='mt-4 space-y-2'>

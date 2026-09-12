@@ -316,6 +316,9 @@ export function TeamoPricingTable(props: TeamoPricingTableProps) {
 
   return (
     <div className='space-y-4'>
+      <p className='text-muted-foreground hidden text-xs max-lg:block'>
+        {t('Swipe sideways to see all columns')}
+      </p>
       <TooltipProvider delay={100}>
         <div
           data-chuyi-pricing-table=''

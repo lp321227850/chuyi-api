@@ -43,7 +43,7 @@ export function Hero(props: HeroProps) {
       <div className='mx-auto flex max-w-4xl flex-col items-center text-center'>
         <div className='chuyi-enter mb-5 inline-flex items-center gap-1.5 rounded-full border border-[var(--chuyi-line,#e6e0d6)] bg-white/80 px-3 py-1.5 text-[11px] font-medium backdrop-blur-sm'>
           <span className='size-1.5 rounded-full bg-emerald-500' aria-hidden />
-          <span>{t('Official models · up to 90% off')}</span>
+          <span>{t('Official models are live')}</span>
         </div>
 
         <h1 className='chuyi-enter chuyi-enter-delay-1 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.15] font-bold tracking-tight'>

@@ -366,6 +366,9 @@ export function PublicHeader(props: PublicHeaderProps) {
 
             {/* Mobile: compact actions + hamburger */}
             <div className='flex items-center gap-2 sm:hidden'>
+              {showLanguageSwitcher && (
+                <LanguageSwitcher appearance='compact' />
+              )}
               {showThemeSwitch && <ThemeSwitch />}
               {showAuthButtons && !loading && isAuthenticated && (
                 <ProfileDropdown />
@@ -471,6 +474,11 @@ export function PublicHeader(props: PublicHeaderProps) {
             )}
             style={{ transitionDelay: mobileOpen ? '250ms' : '0ms' }}
           >
+            {showLanguageSwitcher && (
+              <div className='flex justify-start'>
+                <LanguageSwitcher appearance='compact' />
+              </div>
+            )}
             {showAuthButtons && (
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
